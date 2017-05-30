@@ -16,6 +16,7 @@ listen_port = 1234
 
 import cherrypy
 import urllib
+import hashlib
 
 class MainApp(object):
     # CherryPy Configuration - uses a CherryPy config dictionary
@@ -31,7 +32,10 @@ class MainApp(object):
         Page = "I don't know where you're trying to go, so have a 404 Error."
         cherrypy.response.status = 404
         return Page
-    
+
+
+
+
     # The main web page for the website. The user is directed here when they first open the browser
     @cherrypy.expose
     def index(self):
@@ -44,7 +48,9 @@ class MainApp(object):
             
             Page += "Click here to <a href='login'>login</a>."
         return Page
-    
+
+
+
     #The login page fo rthe sever - currently configured to login into the compsys server via hardcoding my credentials
     @cherrypy.expose
     def login(self):
@@ -54,18 +60,24 @@ class MainApp(object):
         Page += '<input type="submit" value="Login"/></form>'
         return Page
 
+
+
+
     # LOGGING IN AND OUT
     @cherrypy.expose
     def signin(self, username=None, password=None):
         """Check their name and password and send them either to the main page, or back to the main login screen."""
         error = self.authoriseUserLogin(username,password)
         if (error == 0):
-            data = urllib.urlopen('http://cs302.pythonanywhere.com/report?username=jecc724&password=405d0b44b308be384acfaec2bb23f23b81f59f189e56b6c9e224f2ef0d36d79e&location=0&ip=10.103.137.36&port=10001')
-            print data.read()
+            #data = urllib.urlopen('http://cs302.pythonanywhere.com/report?username=jecc724&password=405d0b44b308be384acfaec2bb23f23b81f59f189e56b6c9e224f2ef0d36d79e&location=0&ip=10.103.137.36&port=10001')
+            #print data.read()
             Page = "Welcome! This is a test website for COMPSYS302! You have logged in!<br/>"
             return Page
         else:
             raise cherrypy.HTTPRedirect('/login')
+
+
+
 
     @cherrypy.expose
     def signout(self):
@@ -78,9 +90,10 @@ class MainApp(object):
         raise cherrypy.HTTPRedirect('/')
         
     def authoriseUserLogin(self, username, password):
-        print username
-        print password
-        if (username.lower() == "jecc724") and (password == "tellingmuteCOMPSYS302-2017"):
+        # Get hash of password
+        hashpw = hashlib.sha256(password).hexdigest()
+        data = urllib.urlopen('http://cs302.pythonanywhere.com/report?username=' + username + '&password=' + hashpw + '&location=0&ip=10.103.137.36&port=10001')
+        if (data.read() == "0, User and IP logged"):
             return 0
         else:
             return 1
