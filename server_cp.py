@@ -18,6 +18,8 @@ import urllib2
 import hashlib
 import sys
 import json
+import sqlite3
+from sqlite3 import Error
 
 # The address we listen for connections on
 listen_ip = "0.0.0.0"
@@ -55,12 +57,28 @@ class MainApp(object):
         except KeyError: #There is no username
             
             Page += "Click here to <a href='login'>login</a>."
-        #return urllib2.urlopen("file:///home/jilada/Desktop/COMPSYS302-PYTHON/uoa-cs302-2017-jecc724/index.html")
+        
+        # Upon trying to conenct to the home page, the server will try to connect to a database if the database does not exist it will make it and close it
+        # 
+        try:
+            conn = sqlite3.connect("database.db")
+            print(sqlite3.version)
+        except Error as e:
+            print(e)
+        finally:
+            conn.close()
+        
+        # This section determines if there is a database
+        if (self.connectDatabase() == 1):
+            print "There is a database"
+        else:
+            print "There isn't a database"
+        
         return Page
 
 
 
-    #The login page fo rthe sever - currently configured to login into the compsys server via hardcoding my credentials
+    #The login page for the server
     @cherrypy.expose
     def login(self):
         Page = '<form action="/signin" method="post" enctype="multipart/form-data">'
@@ -84,18 +102,24 @@ class MainApp(object):
         else:
             raise cherrypy.HTTPRedirect('/login')
 
-    
+
+
+    # Function that will allow the user to get a list of the current users online and display them in the terminal
     @cherrypy.expose
     def getList(self):
         # Check for a valid username
         username = cherrypy.session.get('username')
         hashpw = cherrypy.session.get('password')
+        Page = "Here is a list of all the users!<br/>"
         if (username == None):
             pass
         else:
             data = urllib.urlopen('http://cs302.pythonanywhere.com/getList?username=' + username + '&password=' + hashpw + '&enc=0&json=0')
-            print data.read() 
-        raise cherrypy.HTTPRedirect('/')
+            Page += data.read()
+            # Need another functions that will write and read from the database
+        return Page
+
+
 
     @cherrypy.expose
     def signout(self):
@@ -107,18 +131,34 @@ class MainApp(object):
             cherrypy.lib.sessions.expire()
         raise cherrypy.HTTPRedirect('/')
 
-        
+
+    # =================
+    # Private functions  
+    # =================
+  
     def authoriseUserLogin(self, username, password):
         # Get hash of password
         hashpw = hashlib.sha256(password).hexdigest()
         cherrypy.session['password'] = hashpw;
         ipadd = cherrypy.request.remote.ip
         dataip = json.loads(urllib.urlopen("http://ip.jsontest.com/").read())
-        data = urllib.urlopen('http://cs302.pythonanywhere.com/report?username=' + username + '&password=' + hashpw + '&location=1&ip=' + dataip["ip"] + '&port=10001')
+        print dataip["ip"]
+        data = urllib.urlopen('http://cs302.pythonanywhere.com/report?username=' + username + '&password=' + hashpw + '&location=0&ip=' + '10.103.137.64' + '&port=10001')
         if (data.read() == "0, User and IP logged"):
             return 0
         else:
             return 1
+
+
+    def connectDatabase(self):
+		try:
+			dbconnect = create_connection("database.db")
+			cherrypy.session['database'] = dbconnect
+		except Error as e:
+			return e
+		finally:
+			return 1
+		
 
 def runMainApp():
     # Create an instance of MainApp and tell Cherrypy to send all requests under / to it. (ie all of them)
@@ -141,6 +181,7 @@ def runMainApp():
 
     # And stop doing anything else. Let the web server take over.
     cherrypy.engine.block()
+    
  
 #Run the function to start everything
 runMainApp()
