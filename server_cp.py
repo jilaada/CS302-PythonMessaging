@@ -111,7 +111,8 @@ class MainApp(object):
         # Get hash of password
         hashpw = hashlib.sha256(password).hexdigest()
         cherrypy.session['password'] = hashpw;
-        data = urllib.urlopen('http://cs302.pythonanywhere.com/report?username=' + username + '&password=' + hashpw + '&location=2&ip=127.0.0.1&port=10001')
+        ipadd = cherrypy.request.remote.ip
+        data = urllib.urlopen('http://cs302.pythonanywhere.com/report?username=' + username + '&password=' + hashpw + '&location=2&ip=' + ipadd + '&port=10001')
         if (data.read() == "0, User and IP logged"):
             return 0
         else:
