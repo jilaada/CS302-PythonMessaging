@@ -1,0 +1,10 @@
+====================================================
+
+GLOSSARY OF TERMS
+
+====================================================
+
+1. form action (html) - redirects to a page within the website of external to the website
+2. #raise cherrypy.HTTPRedirect('http://cs302.pythonanywhere.com/report?username=jecc724&password=405d0b44b308be384acfaec2bb23f23b81f59f189e56b6c9e224f2ef0d36d79e&location=0&ip=10.103.137.36&port=10001')
+	Will redirect the website to the compsys website
+
