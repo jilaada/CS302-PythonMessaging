@@ -17,6 +17,7 @@ import urllib
 import urllib2
 import hashlib
 import sys
+import json
 
 # The address we listen for connections on
 listen_ip = "0.0.0.0"
@@ -112,7 +113,8 @@ class MainApp(object):
         hashpw = hashlib.sha256(password).hexdigest()
         cherrypy.session['password'] = hashpw;
         ipadd = cherrypy.request.remote.ip
-        data = urllib.urlopen('http://cs302.pythonanywhere.com/report?username=' + username + '&password=' + hashpw + '&location=2&ip=' + ipadd + '&port=10001')
+        dataip = json.loads(urllib.urlopen("http://ip.jsontest.com/").read())
+        data = urllib.urlopen('http://cs302.pythonanywhere.com/report?username=' + username + '&password=' + hashpw + '&location=1&ip=' + dataip["ip"] + '&port=10001')
         if (data.read() == "0, User and IP logged"):
             return 0
         else:
