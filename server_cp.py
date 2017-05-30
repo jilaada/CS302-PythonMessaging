@@ -10,13 +10,20 @@
 # Requires:  CherryPy 3.2.2  (www.cherrypy.org)
 #            Python  (We use 2.7)
 # 
-# The address we listen for connections on
-listen_ip = "0.0.0.0"
-listen_port = 1234
+
 
 import cherrypy
 import urllib
+import urllib2
 import hashlib
+import sys
+
+# The address we listen for connections on
+listen_ip = "0.0.0.0"
+try:
+    listen_port = int(sys.argv[1])
+except (IndexError, TypeError):
+    listen_port = 1234
 
 class MainApp(object):
     # CherryPy Configuration - uses a CherryPy config dictionary
@@ -47,6 +54,7 @@ class MainApp(object):
         except KeyError: #There is no username
             
             Page += "Click here to <a href='login'>login</a>."
+        #return urllib2.urlopen("file:///home/jilada/Desktop/COMPSYS302-PYTHON/uoa-cs302-2017-jecc724/index.html")
         return Page
 
 
@@ -69,15 +77,24 @@ class MainApp(object):
         """Check their name and password and send them either to the main page, or back to the main login screen."""
         error = self.authoriseUserLogin(username,password)
         if (error == 0):
-            #data = urllib.urlopen('http://cs302.pythonanywhere.com/report?username=jecc724&password=405d0b44b308be384acfaec2bb23f23b81f59f189e56b6c9e224f2ef0d36d79e&location=0&ip=10.103.137.36&port=10001')
-            #print data.read()
+            cherrypy.session['username'] = username;
             Page = "Welcome! This is a test website for COMPSYS302! You have logged in!<br/>"
             return Page
         else:
             raise cherrypy.HTTPRedirect('/login')
 
-
-
+    
+    @cherrypy.expose
+    def getList(self):
+        # Check for a valid username
+        username = cherrypy.session.get('username')
+        hashpw = cherrypy.session.get('password')
+        if (username == None):
+            pass
+        else:
+            data = urllib.urlopen('http://cs302.pythonanywhere.com/getList?username=' + username + '&password=' + hashpw + '&enc=0&json=0')
+            print data.read() 
+        raise cherrypy.HTTPRedirect('/')
 
     @cherrypy.expose
     def signout(self):
@@ -88,11 +105,13 @@ class MainApp(object):
         else:
             cherrypy.lib.sessions.expire()
         raise cherrypy.HTTPRedirect('/')
+
         
     def authoriseUserLogin(self, username, password):
         # Get hash of password
         hashpw = hashlib.sha256(password).hexdigest()
-        data = urllib.urlopen('http://cs302.pythonanywhere.com/report?username=' + username + '&password=' + hashpw + '&location=0&ip=10.103.137.36&port=10001')
+        cherrypy.session['password'] = hashpw;
+        data = urllib.urlopen('http://cs302.pythonanywhere.com/report?username=' + username + '&password=' + hashpw + '&location=2&ip=127.0.0.1&port=10001')
         if (data.read() == "0, User and IP logged"):
             return 0
         else:
