@@ -98,11 +98,15 @@ class MainApp(object):
 
     # Function will add single users one at a time to the database
     def addUser(self, conn, user):
+        sql_select_distinct = 'SELECT upi FROM userRegister WHERE upi = ? '
         sql_insert_upi = 'INSERT INTO userRegister(upi) VALUES(?) '
         c = conn.cursor()
-        c.execute(sql_insert_upi, (user,))
-        conn.commit()
-        pass
+        if c.execute(sql_select_distinct, (user,)) is not None:
+            c.execute(sql_insert_upi, (user,))
+            conn.commit()
+            pass
+        else:
+            pass
 
 
 
