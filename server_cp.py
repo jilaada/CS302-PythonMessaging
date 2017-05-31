@@ -54,12 +54,14 @@ class MainApp(object):
         try:
             Page += "Hello " + cherrypy.session['username'] + "!<br/>"
             Page += "Here is some bonus text because you've logged in!"
+            Page += '<form action="/usersOnline" method="post" enctype="multipart/form-data">'
+            Page += '<input type="submit" value="Get Users"/></form>'
         except KeyError: #There is no username
             
             Page += "Click here to <a href='login'>login</a>."
         
-        # Upon trying to conenct to the home page, the server will try to connect to a database if the database does not exist it will make it and close it
-        # 
+        # Upon trying to conenct to the home page, the server will try to connect to a database 
+        # if the database does not exist it will make it and close it
         try:
             conn = sqlite3.connect("database.db")
             print(sqlite3.version)
@@ -76,7 +78,13 @@ class MainApp(object):
         
         return Page
 
-
+	# The main web page for the website. The user is directed here when they first open the browser
+    @cherrypy.expose
+    def usersOnline(self):
+        Page = "Here are the people who are currently online!<br/>"
+        users = self.getList()
+        Page += users.read()
+        return Page
 
     #The login page for the server
     @cherrypy.expose
@@ -86,8 +94,6 @@ class MainApp(object):
         Page += 'Password: <input type="password" name="password"/>'
         Page += '<input type="submit" value="Login"/></form>'
         return Page
-
-
 
 
     # LOGGING IN AND OUT
@@ -101,25 +107,6 @@ class MainApp(object):
             return Page
         else:
             raise cherrypy.HTTPRedirect('/login')
-
-
-
-    # Function that will allow the user to get a list of the current users online and display them in the terminal
-    @cherrypy.expose
-    def getList(self):
-        # Check for a valid username
-        username = cherrypy.session.get('username')
-        hashpw = cherrypy.session.get('password')
-        Page = "Here is a list of all the users!<br/>"
-        if (username == None):
-            pass
-        else:
-            data = urllib.urlopen('http://cs302.pythonanywhere.com/getList?username=' + username + '&password=' + hashpw + '&enc=0&json=0')
-            Page += data.read()
-            # Need another functions that will write and read from the database
-        return Page
-
-
 
     @cherrypy.expose
     def signout(self):
@@ -135,6 +122,20 @@ class MainApp(object):
     # =================
     # Private functions  
     # =================
+    
+	# Function that will allow the user to get a list of the current users online and display them in the terminal
+    #@cherrypy.expose
+    def getList(self):
+        # Check for a valid username
+        username = cherrypy.session.get('username')
+        hashpw = cherrypy.session.get('password')
+        Page = "Here is a list of all the users!<br/>"
+        if (username == None):
+            pass
+        else:
+            data = urllib.urlopen('http://cs302.pythonanywhere.com/getList?username=' + username + '&password=' + hashpw + '&enc=0&json=0')
+            # Need another functions that will write and read from the database
+        return data
   
     def authoriseUserLogin(self, username, password):
         # Get hash of password
