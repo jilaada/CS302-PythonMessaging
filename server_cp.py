@@ -79,10 +79,9 @@ class MainApp(object):
     # The main web page for the website. The user is directed here when they first open the browser
     @cherrypy.expose
     def usersOnline(self):
-        Page = "Here are the people who are currently online!<br/>"
-        users = self.getList()
-
-        Page += users.read()
+        users = self.getList().read()
+        self.refreshDatabase(cherrypy.session['database'], users)
+        Page = users
         return Page
 
 
@@ -134,7 +133,7 @@ class MainApp(object):
         username = cherrypy.session.get('username')
         hashpw = cherrypy.session.get('password')
         if username is None:
-            pass
+            data = "You are not signed in"
         else:
             data = urllib.urlopen('http://cs302.pythonanywhere.com/getList?username=' + username + '&password=' + hashpw + '&enc=0&json=1')
             # Need another functions that will write and read from the database
@@ -144,7 +143,7 @@ class MainApp(object):
     def authoriseUserLogin(self, username, password):
         # Get hash of password
         hashpw = hashlib.sha256(password).hexdigest()
-        cherrypy.session['password'] = hashpw;
+        cherrypy.session['password'] = hashpw
         ipadd = cherrypy.request.remote.ip
         dataip = json.loads(urllib.urlopen("http://ip.jsontest.com/").read())
         print dataip["ip"]
@@ -189,7 +188,13 @@ class MainApp(object):
 
     # Refresh Database will refresh and add the the activity of existing users in the list
     def refreshDatabase(self, conn, onlineUsers):
-        pass
+        dict = json.loads(onlineUsers)
+        c = conn.cursor()
+        for items in dict:
+            sql_update_user = 'UPDATE userRegister SET ip=?, location=?, last_login=? WHERE upi = ?'
+            c.execute(sql_update_user, items[ip], items['location'], items['lastlogin'], items['username'])
+            print dict[items]
+        return dict
 
     def connectDatabase(self):
         try:
