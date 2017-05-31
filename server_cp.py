@@ -101,7 +101,7 @@ class MainApp(object):
     def signin(self, username=None, password=None):
         """Check their name and password and send them either to the main page, or back to the main login screen."""
         error = self.authoriseUserLogin(username,password)
-        if (error == 0):
+        if error == 0:
             cherrypy.session['username'] = username;
             Page = "Welcome! This is a test website for COMPSYS302! You have logged in!<br/>"
             return Page
@@ -112,7 +112,7 @@ class MainApp(object):
     def signout(self):
         """Logs the current user out, expires their session"""
         username = cherrypy.session.get('username')
-        if (username == None):
+        if username is None:
             pass
         else:
             cherrypy.lib.sessions.expire()
@@ -130,7 +130,7 @@ class MainApp(object):
         username = cherrypy.session.get('username')
         hashpw = cherrypy.session.get('password')
         Page = "Here is a list of all the users!<br/>"
-        if (username == None):
+        if username is None:
             pass
         else:
             data = urllib.urlopen('http://cs302.pythonanywhere.com/getList?username=' + username + '&password=' + hashpw + '&enc=0&json=0')
@@ -145,20 +145,20 @@ class MainApp(object):
         dataip = json.loads(urllib.urlopen("http://ip.jsontest.com/").read())
         print dataip["ip"]
         data = urllib.urlopen('http://cs302.pythonanywhere.com/report?username=' + username + '&password=' + hashpw + '&location=0&ip=' + '10.103.137.64' + '&port=10001')
-        if (data.read() == "0, User and IP logged"):
+        if data.read() == "0, User and IP logged":
             return 0
         else:
             return 1
 
 
     def connectDatabase(self):
-		try:
-			dbconnect = create_connection("database.db")
-			cherrypy.session['database'] = dbconnect
-		except Error as e:
-			return e
-		finally:
-			return 1
+        try:
+            dbconnect = create_connection("database.db")
+            cherrypy.session['database'] = dbconnect
+        except Error as e:
+            return e
+        finally:
+            return 1
 		
 
 def runMainApp():
