@@ -26,13 +26,13 @@ listen_ip = "0.0.0.0"
 try:
     listen_port = int(sys.argv[1])
 except (IndexError, TypeError):
-    listen_port = 1234
+    listen_port = 10001
 
 class MainApp(object):
     # CherryPy Configuration - uses a CherryPy config dictionary
     _cp_config = {'tools.encode.on': True, 
                   'tools.encode.encoding': 'utf-8',
-                  'tools.sessions.on' : 'True',
+                  'tools.sessions.on': 'True',
                  }
     
     # Function will be called when the user decides to go someone unspecified by the system
@@ -42,18 +42,6 @@ class MainApp(object):
         Page = "I don't know where you're trying to go, so have a 404 Error."
         cherrypy.response.status = 404
         return Page
-
-
-
-
-
-
-	@cherrypy.expose
-	def writeToDatabase(self):
-		pass
-
-
-
 
 
     # The main web page for the website. The user is directed here when they first open the browser
@@ -79,24 +67,46 @@ class MainApp(object):
             print(e)
         finally:
             conn.close()
-   
-   
-   
-     
+
         # This section determines if there is a database
-        dbaccess = self.connectDatabase()
-        if dbaccess is not 0:
-			sql_create_table_usersRegisters = """CREATE TABLE IF NOT EXISTS userRegister (id integer PRIMARY KEY AUTOINCREMENT, upi TEXT, ip TEXT, public_key TEXT, location INTEGER, last_login TEXT); """
-			c = dbaccess.cursor()
-			c.execute(sql_create_table_usersRegisters)
-			dbaccess.commit()
+        conn = self.connectDatabase()
+        if conn is not None:
+            self.createTable(conn)
+            self.addRegisteredUsers(conn)
         return Page
 
+    # =====================
+    # Database Manipulation
+    # =====================
+
+    # Function that will take a connected database and add the table headers
+    def createTable(self, conn):
+        sql_create_table_usersRegisters = "CREATE TABLE IF NOT EXISTS userRegister (id INTEGER PRIMARY KEY AUTOINCREMENT, upi TEXT, ip TEXT, public_key TEXT, location INTEGER, last_login TEXT); "
+        c = conn.cursor()
+        c.execute(sql_create_table_usersRegisters)
+        conn.commit()
+        pass
+
+    # Function that will take a connected database and add the registered users to the list
+    def addRegisteredUsers(self, conn):
+        dest = "http://cs302.pythonanywhere.com/listUsers"
+        userList = urllib.urlopen(dest)
+        list = tuple(userList.read().split(","))
+        for user in list:
+            self.addUser(conn, user)
+        pass
+
+    # Function will add single users one at a time to the database
+    def addUser(self, conn, user):
+        sql_insert_upi = 'INSERT INTO userRegister(upi) VALUES(?) '
+        c = conn.cursor()
+        c.execute(sql_insert_upi, (user,))
+        conn.commit()
+        pass
 
 
 
-
-	# The main web page for the website. The user is directed here when they first open the browser
+    # The main web page for the website. The user is directed here when they first open the browser
     @cherrypy.expose
     def usersOnline(self):
         Page = "Here are the people who are currently online!<br/>"
@@ -183,12 +193,11 @@ class MainApp(object):
 
     def connectDatabase(self):
         try:
-			dbconnect = sqlite3.connect("database.db")
-			cherrypy.session['database'] = dbconnect
-		except Error as e:
-			return e
-		return dbconnect
-		
+            conn = sqlite3.connect("database.db")
+            cherrypy.session['database'] = conn
+        except Error as e:
+            return e
+        return conn
 
 def runMainApp():
     # Create an instance of MainApp and tell Cherrypy to send all requests under / to it. (ie all of them)
