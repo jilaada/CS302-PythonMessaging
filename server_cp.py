@@ -46,6 +46,16 @@ class MainApp(object):
 
 
 
+
+
+	@cherrypy.expose
+	def writeToDatabase(self):
+		pass
+
+
+
+
+
     # The main web page for the website. The user is directed here when they first open the browser
     @cherrypy.expose
     def index(self):
@@ -60,7 +70,7 @@ class MainApp(object):
             
             Page += "Click here to <a href='login'>login</a>."
         
-        # Upon trying to conenct to the home page, the server will try to connect to a database 
+        # Upon trying to connect to the home page, the server will try to connect to a database 
         # if the database does not exist it will make it and close it
         try:
             conn = sqlite3.connect("database.db")
@@ -69,14 +79,22 @@ class MainApp(object):
             print(e)
         finally:
             conn.close()
-        
+   
+   
+   
+     
         # This section determines if there is a database
-        if (self.connectDatabase() == 1):
-            print "There is a database"
-        else:
-            print "There isn't a database"
-        
+        dbaccess = self.connectDatabase()
+        if dbaccess is not 0:
+			sql_create_table_usersRegisters = """CREATE TABLE IF NOT EXISTS userRegister (id integer PRIMARY KEY AUTOINCREMENT, upi TEXT, ip TEXT, public_key TEXT, location INTEGER, last_login TEXT); """
+			c = dbaccess.cursor()
+			c.execute(sql_create_table_usersRegisters)
+			dbaccess.commit()
         return Page
+
+
+
+
 
 	# The main web page for the website. The user is directed here when they first open the browser
     @cherrypy.expose
@@ -86,6 +104,10 @@ class MainApp(object):
         Page += users.read()
         return Page
 
+
+
+
+
     #The login page for the server
     @cherrypy.expose
     def login(self):
@@ -94,6 +116,8 @@ class MainApp(object):
         Page += 'Password: <input type="password" name="password"/>'
         Page += '<input type="submit" value="Login"/></form>'
         return Page
+
+
 
 
     # LOGGING IN AND OUT
@@ -107,6 +131,8 @@ class MainApp(object):
             return Page
         else:
             raise cherrypy.HTTPRedirect('/login')
+
+
 
     @cherrypy.expose
     def signout(self):
@@ -124,7 +150,6 @@ class MainApp(object):
     # =================
     
 	# Function that will allow the user to get a list of the current users online and display them in the terminal
-    #@cherrypy.expose
     def getList(self):
         # Check for a valid username
         username = cherrypy.session.get('username')
@@ -133,10 +158,13 @@ class MainApp(object):
         if (username == None):
             pass
         else:
-            data = urllib.urlopen('http://cs302.pythonanywhere.com/getList?username=' + username + '&password=' + hashpw + '&enc=0&json=0')
+            data = urllib.urlopen('http://cs302.pythonanywhere.com/getList?username=' + username + '&password=' + hashpw + '&enc=0&json=1')
             # Need another functions that will write and read from the database
         return data
-  
+
+
+
+
     def authoriseUserLogin(self, username, password):
         # Get hash of password
         hashpw = hashlib.sha256(password).hexdigest()
@@ -151,14 +179,15 @@ class MainApp(object):
             return 1
 
 
+
+
     def connectDatabase(self):
 		try:
-			dbconnect = create_connection("database.db")
+			dbconnect = sqlite3.connect("database.db")
 			cherrypy.session['database'] = dbconnect
 		except Error as e:
 			return e
-		finally:
-			return 1
+		return dbconnect
 		
 
 def runMainApp():
