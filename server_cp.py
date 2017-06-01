@@ -19,6 +19,7 @@ import hashlib
 import sys
 import json
 import sqlite3
+import databaseFunctions
 from sqlite3 import Error
 
 # The address we listen for connections on
@@ -66,12 +67,13 @@ class MainApp(object):
 			print(e)
 		finally:
 			conn.close()
+			cherrypy.session['database'] = "on"
 
 		# This section determines if there is a database
-		conn = self.connectDatabase()
-		if conn is not None:
-			self.createTable(conn)
-			self.addRegisteredUsers(conn)
+		if cherrypy.session['database'] is not None:
+			databaseFunctions.createTable()
+			databaseFunctions.addRegisteredUsers()
+		
 		return Page
 
 
@@ -79,7 +81,7 @@ class MainApp(object):
 	@cherrypy.expose
 	def usersOnline(self):
 		users = self.getList().read()
-		self.refreshDatabase(cherrypy.session['database'], users)
+		databaseFunctions.refreshDatabase(users)
 		Page = users
 		return Page
 
@@ -145,7 +147,7 @@ class MainApp(object):
 
 	def authoriseUserLogin(self, username, password):
 		# Get hash of password
-		hashpw = hashlib.sha256(password).hexdigest()
+		hashpw = hashlib.sha256(password + "COMPSYS302-2017").hexdigest()
 		cherrypy.session['password'] = hashpw
 		ipadd = cherrypy.request.remote.ip
 		dataip = json.loads(urllib.urlopen("http://ip.jsontest.com/").read())
@@ -159,57 +161,6 @@ class MainApp(object):
 	# CLIENT  APPLICATION  
 	# ===================
 
-
-
-	# =====================
-	# Database Manipulation
-	# =====================
-
-	# Function that will take a connected database and add the table headers
-	def createTable(self, conn):
-		sql_create_table_usersRegisters = "CREATE TABLE IF NOT EXISTS userRegister (id INTEGER PRIMARY KEY AUTOINCREMENT, upi TEXT UNIQUE, ip TEXT, public_key TEXT, location INTEGER, last_login TEXT, port TEXT); "
-		c = conn.cursor()
-		c.execute(sql_create_table_usersRegisters)
-		conn.commit()
-		pass
-
-	# Function that will take a connected database and add the registered users to the list
-	def addRegisteredUsers(self, conn):
-		dest = "http://cs302.pythonanywhere.com/listUsers"
-		userList = urllib.urlopen(dest)
-		list = tuple(userList.read().split(","))
-		for user in list:
-			self.addUser(conn, user)
-		pass
-
-	# Function will add single users one at a time to the database
-	def addUser(self, conn, user):
-		sql_insert_upi = 'INSERT OR IGNORE INTO userRegister(upi) VALUES(?) '
-		c = conn.cursor()
-		c.execute(sql_insert_upi, (user,))
-		conn.commit()
-		pass
-
-	# Refresh Database will refresh and add the the activity of existing users in the list
-	def refreshDatabase(self, conn, onlineUsers):
-		dict = json.loads(onlineUsers)
-		c = conn.cursor()
-		for items in dict:
-			try:
-				sql_update_user = 'UPDATE userRegister SET ip==:ip, location==:location, last_login==:lastLogin, port==:port WHERE upi==:username'
-				c.execute(sql_update_user, {"ip":dict[items]['ip'], "location":dict[items]['location'], "lastLogin":dict[items]['lastLogin'], "username":dict[items]['username'], "port":dict[items]['port']})
-			except KeyError as e:
-				print e
-			conn.commit()
-		return dict
-
-	def connectDatabase(self):
-		try:
-			conn = sqlite3.connect("database.db")
-			cherrypy.session['database'] = conn
-		except Error as e:
-			return e
-		return conn
 
 
 def runMainApp():
