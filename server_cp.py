@@ -62,7 +62,6 @@ class MainApp(object):
 		# if the database does not exist it will make it and close it
 		try:
 			conn = sqlite3.connect("database.db")
-			print(sqlite3.version)
 		except Error as e:
 			print(e)
 		finally:
@@ -122,7 +121,6 @@ class MainApp(object):
 			cherrypy.lib.sessions.expire()
 		raise cherrypy.HTTPRedirect('/')
 
-
 	# =================
 	# Private functions  
 	# =================
@@ -139,6 +137,8 @@ class MainApp(object):
 			# Need another functions that will write and read from the database
 		return data
 
+	def reportServer(self, username, password):
+		pass
 
 	def authoriseUserLogin(self, username, password):
 		# Get hash of password
@@ -146,12 +146,17 @@ class MainApp(object):
 		cherrypy.session['password'] = hashpw
 		ipadd = cherrypy.request.remote.ip
 		dataip = json.loads(urllib.urlopen("http://ip.jsontest.com/").read())
-		print dataip["ip"]
 		data = urllib.urlopen('http://cs302.pythonanywhere.com/report?username=' + username + '&password=' + hashpw + '&location=0&ip=' + '10.103.137.71' + '&port=10001')
 		if data.read() == "0, User and IP logged":
 			return 0
 		else:
 			return 1
+
+	# ===================
+	# CLIENT  APPLICATION  
+	# ===================
+
+
 
 	# =====================
 	# Database Manipulation
@@ -188,12 +193,11 @@ class MainApp(object):
 		c = conn.cursor()
 		for items in dict:
 			try:
-				print dict[items]['ip']
-				sql_update_user = 'UPDATE userRegister SET ip==:ip, location==:location, last_login==:lastLogin, port==:port, public_key==:pubkey WHERE upi==:username'
-				c.execute(sql_update_user, {"ip":dict[items]['ip'], "location":dict[items]['location'], "lastLogin":dict[items]['lastLogin'], "username":dict[items]['username'], "port":dict[items]['port'], "pubkey":dict[items]['publicKey']})
-				conn.commit()
+				sql_update_user = 'UPDATE userRegister SET ip==:ip, location==:location, last_login==:lastLogin, port==:port WHERE upi==:username'
+				c.execute(sql_update_user, {"ip":dict[items]['ip'], "location":dict[items]['location'], "lastLogin":dict[items]['lastLogin'], "username":dict[items]['username'], "port":dict[items]['port']})
 			except KeyError as e:
 				print e
+			conn.commit()
 		return dict
 
 	def connectDatabase(self):
