@@ -115,9 +115,12 @@ class MainApp(object):
 	def signout(self):
 		"""Logs the current user out, expires their session"""
 		username = cherrypy.session.get('username')
+		password = cherrypy.session.get('password')
 		if username is None:
 			pass
 		else:
+			data = urllib.urlopen('http://cs302.pythonanywhere.com/logoff?username=' + username + '&password=' + password + '&enc=0')
+			print data.read()
 			cherrypy.lib.sessions.expire()
 		raise cherrypy.HTTPRedirect('/')
 
