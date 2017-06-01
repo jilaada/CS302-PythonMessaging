@@ -10,7 +10,7 @@
 # Requires:  CherryPy 3.2.2  (www.cherrypy.org)
 #            Python  (We use 2.7)
 # 
-
+# Used for threading the report and the update of user lists
 
 import cherrypy
 import urllib
@@ -20,3 +20,7 @@ import sys
 import json
 import sqlite3
 from sqlite3 import Error
+
+def externReport():
+	
+	pass

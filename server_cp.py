@@ -157,11 +157,6 @@ class MainApp(object):
 		else:
 			return 1
 
-	# ===================
-	# CLIENT  APPLICATION  
-	# ===================
-
-
 
 def runMainApp():
 	# Create an instance of MainApp and tell Cherrypy to send all requests under / to it. (ie all of them)
