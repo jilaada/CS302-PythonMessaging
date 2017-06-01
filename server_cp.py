@@ -19,7 +19,10 @@ import hashlib
 import sys
 import json
 import sqlite3
+import threading
+import time
 import databaseFunctions
+import externalComm
 from sqlite3 import Error
 
 # The address we listen for connections on
@@ -74,13 +77,14 @@ class MainApp(object):
 			databaseFunctions.createTable()
 			databaseFunctions.addRegisteredUsers()
 		
+		print threading.__file__
 		return Page
 
 
 	# The main web page for the website. The user is directed here when they first open the browser
 	@cherrypy.expose
 	def usersOnline(self):
-		users = self.getList().read()
+		users = externalComm.getList(cherrypy.session.get('username'), cherrypy.session.get('password')).read()
 		databaseFunctions.refreshDatabase(users)
 		Page = users
 		return Page
@@ -105,7 +109,6 @@ class MainApp(object):
 		"""Check their name and password and send them either to the main page, or back to the main login screen."""
 		error = self.authoriseUserLogin(username,password)
 		if error == 0:
-			cherrypy.session['username'] = username
 			Page = "Welcome! This is a test website for COMPSYS302! You have logged in!<br/>"
 			return Page
 		else:
@@ -122,6 +125,7 @@ class MainApp(object):
 			pass
 		else:
 			data = urllib.urlopen('http://cs302.pythonanywhere.com/logoff?username=' + username + '&password=' + password + '&enc=0')
+			externalComm.toggleAuthority(False)
 			print data.read()
 			cherrypy.lib.sessions.expire()
 		raise cherrypy.HTTPRedirect('/')
@@ -129,32 +133,25 @@ class MainApp(object):
 	# =================
 	# Private functions  
 	# =================
-	
-	# Function that will allow the user to get a list of the current users online and display them in the terminal
-	def getList(self):
-		# Check for a valid username
-		username = cherrypy.session.get('username')
-		hashpw = cherrypy.session.get('password')
-		if username is None:
-			data = "You are not signed in"
-		else:
-			data = urllib.urlopen('http://cs302.pythonanywhere.com/getList?username=' + username + '&password=' + hashpw + '&enc=0&json=1')
-			# Need another functions that will write and read from the database
-		return data
-
-	def reportServer(self, username, password):
-		pass
 
 	def authoriseUserLogin(self, username, password):
 		# Get hash of password
 		hashpw = hashlib.sha256(password + "COMPSYS302-2017").hexdigest()
-		cherrypy.session['password'] = hashpw
 		ipadd = cherrypy.request.remote.ip
 		dataip = json.loads(urllib.urlopen("http://ip.jsontest.com/").read())
 		data = urllib.urlopen('http://cs302.pythonanywhere.com/report?username=' + username + '&password=' + hashpw + '&location=0&ip=' + '10.103.137.71' + '&port=10001')
 		if data.read() == "0, User and IP logged":
+			cherrypy.session['password'] = hashpw
+			cherrypy.session['username'] = username
+			t = threading.Thread(target=externalComm.externReport, args=(cherrypy.session['username'], cherrypy.session['password'],))
+			cherrypy.session['threadOne'] = t
+			t.daemon = True
+			externalComm.toggleAuthority(True)
+			t.start()
 			return 0
 		else:
+			cherrypy.session['password'] = None
+			cherrypy.session['username'] = None
 			return 1
 
 
@@ -181,4 +178,5 @@ def runMainApp():
 	cherrypy.engine.block()
 	
 #Run the function to start everything
-runMainApp()
+if __name__ == '__main__':
+	runMainApp()
