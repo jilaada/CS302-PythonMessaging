@@ -77,7 +77,6 @@ class MainApp(object):
 			databaseFunctions.createTable()
 			databaseFunctions.addRegisteredUsers()
 		
-		print threading.__file__
 		return Page
 
 
@@ -130,6 +129,14 @@ class MainApp(object):
 			cherrypy.lib.sessions.expire()
 		raise cherrypy.HTTPRedirect('/')
 
+	@cherrypy.expose
+	@cherrypy.tools.json_in()
+	def receiveMessage(self):
+		inputMessage = cherrypy.request.json
+		# Need some way of taking this message and saving it in the database
+		
+		print inputMessage
+
 	# =================
 	# Private functions  
 	# =================
@@ -139,7 +146,7 @@ class MainApp(object):
 		hashpw = hashlib.sha256(password + "COMPSYS302-2017").hexdigest()
 		ipadd = cherrypy.request.remote.ip
 		dataip = json.loads(urllib.urlopen("http://ip.jsontest.com/").read())
-		data = urllib.urlopen('http://cs302.pythonanywhere.com/report?username=' + username + '&password=' + hashpw + '&location=0&ip=' + '10.103.137.71' + '&port=10001')
+		data = urllib.urlopen('http://cs302.pythonanywhere.com/report?username=' + username + '&password=' + hashpw + '&location=0&ip=' + '10.103.137.70' + '&port=10001')
 		if data.read() == "0, User and IP logged":
 			cherrypy.session['password'] = hashpw
 			cherrypy.session['username'] = username
