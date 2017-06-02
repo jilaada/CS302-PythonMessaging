@@ -26,6 +26,7 @@ import time
 
 toggleThread = False
 
+# External report tied to the thread
 def externReport(curUser, curPw):
 	while(1):
 		# Need to try and report information to the login server as well as update the table list
@@ -43,6 +44,7 @@ def externReport(curUser, curPw):
 			print "Reporting"
 		time.sleep(25)
 
+# Toggle whether or not the function thread should report the credentials
 def toggleAuthority(setToggle):
 	global toggleThread
 	if setToggle is True:
@@ -50,6 +52,7 @@ def toggleAuthority(setToggle):
 	else:
 		toggleThread = False
 
+# Report automatically to the server
 def autoReport(username, password):
 	ipadd = cherrypy.request.remote.ip
 	dataip = json.loads(urllib.urlopen("http://ip.jsontest.com/").read())
@@ -71,6 +74,7 @@ def autoGetList(user, pw):
 		# Need another functions that will write and read from the database
 	return data
 
+# Get the users who are online
 def usersOnline(user, pw):
 	users = autoGetList(user, pw).read()
 	databaseFunctions.refreshDatabase(users)
