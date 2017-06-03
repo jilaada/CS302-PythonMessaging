@@ -83,9 +83,10 @@ class MainApp(object):
 	# The main web page for the website. The user is directed here when they first open the browser
 	@cherrypy.expose
 	def usersOnline(self):
-		users = externalComm.autoGetList(cherrypy.session.get('username'), cherrypy.session.get('password')).read()
-		databaseFunctions.refreshDatabase(users)
-		Page = users
+		users = databaseFunctions.dropdownGet()
+		Page = "Here is a list of all the users online!<br/><br/>"
+		for i in users:
+			Page += i + '<br/>'
 		return Page
 
 
@@ -140,8 +141,15 @@ class MainApp(object):
 
 	@cherrypy.expose
 	def messageWrite(self):
+		users = databaseFunctions.dropdownGet()
 		Page = '<form action="/sendMessage" method="post" enctype="multipart/form-data">'
-		Page += 'Reciever: <input type="text" name="destination"/><br/>'
+		Page += 'Receiver: '
+		Page += '<div>'
+		Page += '<select name="destination" id="customDropdown">'
+		for i in users:
+			Page += '<option value=' + i + '>' + i + '</option><br/>'
+		Page += '</select>'
+		Page += '</div>'
 		Page += 'Message: <input type="text" name="message"/>'
 		Page += '<input type="submit" value="Send"/></form>'
 		return Page
@@ -150,21 +158,22 @@ class MainApp(object):
 	def sendMessage(self, destination=None, message=None):
 		epoch_time = float(time.time())
 		output_dict = {"sender":"jecc724", "destination":destination, "message":message, "stamp":epoch_time}
+		ins = databaseFunctions.insertMessage(output_dict)
+		if ins == 1:
+			print "Error - Message did not store properly"
 		sendData = json.dumps(output_dict)
 		try:
 			data = databaseFunctions.getIP(destination)
-			ipData = data["ip"]
-			portData = data["port"]
-			print ipData
-			print portData
-			if ipData is None or portData is None:
+			if data["ip"] is None or data["port"] is None:
 				print "Error - Unable to send the user the message, they don't exist on the database!"
-				raise cherrypy.HTTPRedirect('/messageWrite')
 			else:
-				self.send(sendData, ipData, portData)
+				try:
+					sent = externalComm.send(sendData, data["ip"], data["port"])
+				except Error as e:
+					raise cherrypy.HTTPRedirect('/')
 		except Error as e:
 			print e 
-			raise cherrypy.HTTPRedirect('/messageWrite')
+		raise cherrypy.HTTPRedirect('/messageWrite')
 
 	# =================
 	# Private functions  
@@ -193,12 +202,6 @@ class MainApp(object):
 			cherrypy.session['username'] = None
 			return 1
 
-	def send(self, jsonDump, ip, port):
-		dest = "http://" + ip + ":" + port + "/receiveMessage"
-		req = urllib2.Request(dest, jsonDump, {'Content-Type':'application/json'})
-		response = urllib2.urlopen(req)
-		print response
-		raise cherrypy.HTTPRedirect('/messageWrite')
 
 def runMainApp():
 	# Create an instance of MainApp and tell Cherrypy to send all requests under / to it. (ie all of them)

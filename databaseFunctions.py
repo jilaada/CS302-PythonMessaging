@@ -19,6 +19,7 @@ import hashlib
 import sys
 import json
 import threading
+import time
 import sqlite3
 from sqlite3 import Error
 
@@ -29,7 +30,7 @@ from sqlite3 import Error
 # Function that will take a connected database and add the table headers
 def createTable():
 	sql_create_table_usersRegisters = "CREATE TABLE IF NOT EXISTS userRegister (id INTEGER PRIMARY KEY AUTOINCREMENT, upi TEXT UNIQUE, ip TEXT, public_key TEXT, location INTEGER, last_login TEXT, port TEXT); "
-	sql_create_table_messageData = "CREATE TABLE IF NOT EXISTS messageData (id INTEGER PRIMARY KEY AUTOINCREMENT, senderUPI TEXT , time_stamp TEXT, message TEXT); "
+	sql_create_table_messageData = "CREATE TABLE IF NOT EXISTS messageData (id INTEGER PRIMARY KEY AUTOINCREMENT, senderUPI TEXT, destinationUPI TEXT, time_stamp TEXT, message TEXT); "
 	conn = connectDatabase()
 	c = conn.cursor()
 	c.execute(sql_create_table_usersRegisters)
@@ -78,19 +79,20 @@ def insertMessage(messageData):
 	c = conn.cursor()
 	try:
 		# Assuming they are not 
-		#sql_select_message = 'SELECT * FROM messageData WHERE senderUPI==:username AND time_stamp==:time_stamp'
-		#c.execute(sql_select_message, {"username":messageData['sender'], "time_stamp":messageData['stamp']})
-		#if c.fetchone() is None:
-			#try:
-		sql_insert_message = 'INSERT INTO messageData (senderUPI, time_stamp, message) VALUES (:username, :time_stamp, :message)'
-		c.execute(sql_insert_message, {"username":messageData['sender'], "time_stamp":messageData['stamp'], "message":messageData['message']})
-		conn.commit()
-			#except Error as e:
-				#print e
-		#else:
-			#print "Message saved already"
+		sql_select_message = 'SELECT * FROM messageData WHERE senderUPI==:username AND time_stamp==:time_stamp'
+		c.execute(sql_select_message, {"username":messageData['sender'], "time_stamp":messageData['stamp']})
+		if c.fetchone() is None:
+			try:
+				sql_insert_message = 'INSERT INTO messageData (senderUPI, time_stamp, message, destinationUPI) VALUES (:username, :time_stamp, :message, :destination)'
+				c.execute(sql_insert_message, {"username":messageData['sender'], "time_stamp":messageData['stamp'], "message":messageData['message'], "destination":messageData['destination']})
+				conn.commit()
+			except Error as e:
+				print e
+		else:
+			print "Message saved already"
 	except Error as e:
 		print e
+		return 1
 	conn.close()
 	return 0
 
@@ -111,6 +113,30 @@ def getIP(destUPI):
 	except Error as e:
 		print "Error - Not able to print get name"
 		return 0
+
+# Get a list of users who are online
+def dropdownGet():
+	# Getting comparison time
+	currentTime = time.time()
+	compTime = currentTime - 60
+	# Connect to database
+	conn = connectDatabase()
+	conn.row_factory = sqlite3.Row
+	c = conn.cursor()
+	try:
+		sql_select_onlineUsers = 'SELECT upi FROM userRegister WHERE last_login >= :time'
+		c.execute(sql_select_onlineUsers, {"time":compTime})
+		userList = c.fetchall()
+		conn.close()
+		try:
+			# Convert list to tuple
+			userList = [i for sub in userList for i in sub]
+			return userList
+		except Error as e:
+			print "Error - in converting tuple to list"
+	except Error as e:
+		print "Error - not able to get users"
+	return 0
 
 
 # Connect to the database, returns the connection object

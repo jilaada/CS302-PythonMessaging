@@ -71,10 +71,20 @@ def autoGetList(user, pw):
 		data = "You are not signed in"
 	else:
 		data = urllib.urlopen('http://cs302.pythonanywhere.com/getList?username=' + user + '&password=' + pw + '&enc=0&json=1')
-		# Need another functions that will write and read from the database
 	return data
 
 # Get the users who are online
 def usersOnline(user, pw):
 	users = autoGetList(user, pw).read()
 	databaseFunctions.refreshDatabase(users)
+
+# Send the message data to the users
+def send(jsonDump, ip, port):
+	dest = "http://" + ip + ":" + port + "/receiveMessage"
+	try:
+		req = urllib2.Request(dest, jsonDump, {'Content-Type':'application/json'})
+		response = urllib2.urlopen(req)
+	except Error as e:
+		print "Error - " + e
+	print response.read()
+	return response
