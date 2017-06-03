@@ -56,7 +56,7 @@ def toggleAuthority(setToggle):
 def autoReport(username, password):
 	ipadd = cherrypy.request.remote.ip
 	dataip = json.loads(urllib.urlopen("http://ip.jsontest.com/").read())
-	data = urllib.urlopen('http://cs302.pythonanywhere.com/report?username=' + username + '&password=' + password + '&location=0&ip=' + '10.103.137.70' + '&port=10001')
+	data = urllib.urlopen('http://cs302.pythonanywhere.com/report?username=' + username + '&password=' + password + '&location=0&ip=' + '10.103.137.64' + '&port=10001')
 	error = data.read()
 	if error[0] is "0":
 		return 0

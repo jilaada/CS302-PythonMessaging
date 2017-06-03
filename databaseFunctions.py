@@ -70,11 +70,48 @@ def refreshDatabase(onlineUsers):
 			print e
 		conn.commit()
 	conn.close()
-	return dict
+	return dic
 
 # Refresh the message database so that messages are stored in teh database
-def insertMessage(dictional):
-	pass
+def insertMessage(messageData):
+	conn = connectDatabase()
+	c = conn.cursor()
+	try:
+		# Assuming they are not 
+		#sql_select_message = 'SELECT * FROM messageData WHERE senderUPI==:username AND time_stamp==:time_stamp'
+		#c.execute(sql_select_message, {"username":messageData['sender'], "time_stamp":messageData['stamp']})
+		#if c.fetchone() is None:
+			#try:
+		sql_insert_message = 'INSERT INTO messageData (senderUPI, time_stamp, message) VALUES (:username, :time_stamp, :message)'
+		c.execute(sql_insert_message, {"username":messageData['sender'], "time_stamp":messageData['stamp'], "message":messageData['message']})
+		conn.commit()
+			#except Error as e:
+				#print e
+		#else:
+			#print "Message saved already"
+	except Error as e:
+		print e
+	conn.close()
+	return 0
+
+# Get the IP from the database
+def getIP(destUPI):
+	conn = connectDatabase()
+	conn.row_factory = sqlite3.Row
+	c = conn.cursor()
+	try:
+		sql_select_ip = 'SELECT ip, port FROM userRegister WHERE upi==:upi'
+		c.execute(sql_select_ip, {"upi":destUPI})
+		getIP = c.fetchone()
+		conn.close()
+		if getIP is None:
+			return 0
+		else:
+			return getIP
+	except Error as e:
+		print "Error - Not able to print get name"
+		return 0
+
 
 # Connect to the database, returns the connection object
 def connectDatabase():

@@ -58,10 +58,10 @@ class MainApp(object):
 			Page += "Here is some bonus text because you've logged in!"
 			Page += '<form action="/usersOnline" method="post" enctype="multipart/form-data">'
 			Page += '<input type="submit" value="Get Users"/></form>'
+			Page += '<form action="/messageWrite" method="post" enctype="multipart/form-data">'
+			Page += '<input type="submit" value="Send a Message"/></form>'
 		except KeyError: #There is no username
-			
 			Page += "Click here to <a href='login'>login</a>."
-		
 		# Upon trying to connect to the home page, the server will try to connect to a database 
 		# if the database does not exist it will make it and close it
 		try:
@@ -83,7 +83,7 @@ class MainApp(object):
 	# The main web page for the website. The user is directed here when they first open the browser
 	@cherrypy.expose
 	def usersOnline(self):
-		users = externalComm.getList(cherrypy.session.get('username'), cherrypy.session.get('password')).read()
+		users = externalComm.autoGetList(cherrypy.session.get('username'), cherrypy.session.get('password')).read()
 		databaseFunctions.refreshDatabase(users)
 		Page = users
 		return Page
@@ -134,8 +134,37 @@ class MainApp(object):
 	def receiveMessage(self):
 		inputMessage = cherrypy.request.json
 		# Need some way of taking this message and saving it in the database
-		
+		databaseFunctions.insertMessage(inputMessage)
 		print inputMessage
+		return "0"
+
+	@cherrypy.expose
+	def messageWrite(self):
+		Page = '<form action="/sendMessage" method="post" enctype="multipart/form-data">'
+		Page += 'Reciever: <input type="text" name="destination"/><br/>'
+		Page += 'Message: <input type="text" name="message"/>'
+		Page += '<input type="submit" value="Send"/></form>'
+		return Page
+
+	@cherrypy.expose
+	def sendMessage(self, destination=None, message=None):
+		epoch_time = float(time.time())
+		output_dict = {"sender":"jecc724", "destination":destination, "message":message, "stamp":epoch_time}
+		sendData = json.dumps(output_dict)
+		try:
+			data = databaseFunctions.getIP(destination)
+			ipData = data["ip"]
+			portData = data["port"]
+			print ipData
+			print portData
+			if ipData is None or portData is None:
+				print "Error - Unable to send the user the message, they don't exist on the database!"
+				raise cherrypy.HTTPRedirect('/messageWrite')
+			else:
+				self.send(sendData, ipData, portData)
+		except Error as e:
+			print e 
+			raise cherrypy.HTTPRedirect('/messageWrite')
 
 	# =================
 	# Private functions  
@@ -146,7 +175,10 @@ class MainApp(object):
 		hashpw = hashlib.sha256(password + "COMPSYS302-2017").hexdigest()
 		ipadd = cherrypy.request.remote.ip
 		dataip = json.loads(urllib.urlopen("http://ip.jsontest.com/").read())
-		data = urllib.urlopen('http://cs302.pythonanywhere.com/report?username=' + username + '&password=' + hashpw + '&location=0&ip=' + '10.103.137.70' + '&port=10001')
+		try:
+			data = urllib.urlopen('http://cs302.pythonanywhere.com/report?username=' + username + '&password=' + hashpw + '&location=0&ip=' + '10.103.137.64' + '&port=10001')
+		except KeyError:
+			raise cherrypy.HTTPRedirect('/login')
 		if data.read() == "0, User and IP logged":
 			cherrypy.session['password'] = hashpw
 			cherrypy.session['username'] = username
@@ -161,6 +193,12 @@ class MainApp(object):
 			cherrypy.session['username'] = None
 			return 1
 
+	def send(self, jsonDump, ip, port):
+		dest = "http://" + ip + ":" + port + "/receiveMessage"
+		req = urllib2.Request(dest, jsonDump, {'Content-Type':'application/json'})
+		response = urllib2.urlopen(req)
+		print response
+		raise cherrypy.HTTPRedirect('/messageWrite')
 
 def runMainApp():
 	# Create an instance of MainApp and tell Cherrypy to send all requests under / to it. (ie all of them)
