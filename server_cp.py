@@ -3,27 +3,24 @@
 
 	COMPSYS302 - Software Design
 	Author: Jilada Eccleston
-	Last Edited: 19/02/2015
+	Last Edited: 4/05/2015
 
 	This program uses the CherryPy web server (from www.cherrypy.org).
 """
 # Requires:  CherryPy 3.2.2  (www.cherrypy.org)
 #            Python  (We use 2.7)
-# 
-
 
 import cherrypy
 import urllib
-import urllib2
 import hashlib
 import sys
 import json
 import sqlite3
 import threading
 import time
-import socket
 import databaseFunctions
 import externalComm
+import internalComm
 from sqlite3 import Error
 
 # The address we listen for connections on
@@ -35,11 +32,11 @@ except (IndexError, TypeError):
 
 class MainApp(object):
 	# CherryPy Configuration - uses a CherryPy config dictionary
-	_cp_config = {'tools.encode.on': True, 
+	_cp_config = {'tools.encode.on': True,
 				  'tools.encode.encoding': 'utf-8',
 				  'tools.sessions.on': 'True',
 				 }
-	
+
 	# Function will be called when the user decides to go someone unspecified by the system
 	@cherrypy.expose
 	def default(self, *args, **kwargs):
@@ -53,7 +50,7 @@ class MainApp(object):
 	@cherrypy.expose
 	def index(self):
 		Page = "Welcome! This is a test website for COMPSYS302!<br/>"
-		
+
 		try:
 			users = databaseFunctions.dropdownGet()
 			Page += "Hello " + cherrypy.session['username'] + "!<br/>"
@@ -62,7 +59,7 @@ class MainApp(object):
 			Page += '<input type="submit" value="Get Users"/></form>'
 			Page += '<form action="/messageWrite" method="post" enctype="multipart/form-data">'
 			Page += '<input type="submit" value="Send a Message"/></form>'
-			Page += '<form action="/profile" method="post" enctype="multipart/form-data">'
+			Page += '<form action="/userProfile" method="post" enctype="multipart/form-data">'
 			Page += 'User: '
 			Page += '<select name="user" id="customDropdown">'
 			for i in users:
@@ -71,7 +68,7 @@ class MainApp(object):
 			Page += '<input type="submit" value="Get Profile"/></form>'
 		except KeyError: #There is no username
 			Page += "Click here to <a href='login'>login</a>."
-		# Upon trying to connect to the home page, the server will try to connect to a database 
+		# Upon trying to connect to the home page, the server will try to connect to a database
 		# if the database does not exist it will make it and close it
 		try:
 			conn = sqlite3.connect("database.db")
@@ -85,7 +82,7 @@ class MainApp(object):
 		if cherrypy.session['database'] is not None:
 			databaseFunctions.createTable()
 			databaseFunctions.addRegisteredUsers()
-		
+
 		return Page
 
 
@@ -119,7 +116,6 @@ class MainApp(object):
 	@cherrypy.expose
 	def signin(self, username=None, password=None, location=None):
 		"""Check their name and password and send them either to the main page, or back to the main login screen."""
-		print location
 		error = self.authoriseUserLogin(username,password, location)
 		if error == 0:
 			Page = "Welcome! This is a test website for COMPSYS302! You have logged in!<br/>"
@@ -183,28 +179,8 @@ class MainApp(object):
 			encoding = int(2)
 			encryption = int(0)
 			output_dict = {"fullname":fullname, "position":position, "description":description, "location":location, "picture":picture, "encoding":encoding, "encryption":encryption}
-			#sendData = json.dumps(output_dict)
 			return json.dumps(output_dict)
 		pass
-
-
-	@cherrypy.expose
-	def profile(self, user=None):
-		user_dict = {"profile_username":user}
-		sendData = json.dumps(user_dict)
-		# Need to get the port and ip of the user
-		data = databaseFunctions.getIP(user)
-		try:
-			sent = externalComm.reqProfile(sendData, data["ip"], data["port"])
-			try:
-				# Store values in the database
-				databaseFunctions.storeProfile(sent.read(), user)
-				#print sent.read()
-			except Error as e:
-				print e
-		except Error as e:
-			print e
-		raise cherrypy.HTTPRedirect('/')
 
 
 	@cherrypy.expose
@@ -222,35 +198,25 @@ class MainApp(object):
 			else:
 				try:
 					sent = externalComm.send(sendData, data["ip"], data["port"])
-					try:
-						print sent.read()
-					except Error as e:
-						print e
-				except Error as e:
+					print sent
+				except KeyError as e:
 					raise cherrypy.HTTPRedirect('/')
-		except Error as e:
-			print e 
+		except (KeyError, TypeError) as e:
+			print e
 		raise cherrypy.HTTPRedirect('/messageWrite')
 
 	# =================
-	# Private functions  
+	# Private functions
 	# =================
 
 	def authoriseUserLogin(self, username, password, location):
 		# Get hash of password
 		hashpw = hashlib.sha256(password + "COMPSYS302-2017").hexdigest()
-		if location == "0":
-			# Get internal IP
-			dataip = socket.gethostbyname(socket.gethostname())
-		else:
-			# Get external IP 
-			ipadd = cherrypy.request.remote.ip
-			dataip = json.loads(urllib.urlopen("http://ip.jsontest.com/").read())
 		try:
-			data = urllib.urlopen('http://cs302.pythonanywhere.com/report?username=' + username + '&password=' + hashpw + '&location=' + location + '&ip=' + dataip + '&port=10001')
-		except KeyError:
+			error = externalComm.autoReport(username, hashpw, location)
+		except (KeyError, TypeError):
 			raise cherrypy.HTTPRedirect('/login')
-		if data.read() == "0, User and IP logged":
+		if error == 0:
 			cherrypy.session['password'] = hashpw
 			cherrypy.session['username'] = username
 			cherrypy.session['location'] = location
@@ -258,13 +224,22 @@ class MainApp(object):
 			t.daemon = True
 			externalComm.toggleAuthority(True)
 			t.start()
+			print "-----------------------"
 			print "--- THREAD STARTING ---"
+			print "-----------------------"
 			return 0
 		else:
 			cherrypy.session['password'] = None
 			cherrypy.session['username'] = None
+			cherrypy.session['location'] = None
 			return 1
 
+	def userProfile(self, user=None):
+		try:
+			internalComm.profile(user)
+			raise cherrypy.HTTPRedirect('/')
+		except (KeyError, TypeError):
+			raise cherrypy.HTTPRedirect('/')
 
 def runMainApp():
 	# Create an instance of MainApp and tell Cherrypy to send all requests under / to it. (ie all of them)
@@ -279,15 +254,15 @@ def runMainApp():
 	print "========================================"
 	print "University of Auckland"
 	print "COMPSYS302 - Software Design Application"
-	print "Jilada Eccleston"   
-	print "========================================"                       
-	
+	print "Jilada Eccleston"
+	print "========================================"
+
 	# Start the web server
 	cherrypy.engine.start()
 
 	# And stop doing anything else. Let the web server take over.
 	cherrypy.engine.block()
-	
+
 #Run the function to start everything
 if __name__ == '__main__':
 	runMainApp()

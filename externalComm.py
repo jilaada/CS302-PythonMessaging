@@ -12,14 +12,9 @@
 # 
 # Used for threading the report and the update of user lists
 
-import cherrypy
 import urllib
 import urllib2
-import hashlib
-import sys
 import json
-import sqlite3
-import threading
 import socket
 import databaseFunctions
 from sqlite3 import Error
@@ -61,9 +56,9 @@ def autoReport(username, password, curLocation):
 		# Get internal IP
 		dataip = socket.gethostbyname(socket.gethostname())
 	else:
-		# Get external IP 
-		ipadd = cherrypy.request.remote.ip
-		dataip = json.loads(urllib.urlopen("http://ip.jsontest.com/").read())
+		# Get external IP
+		data = json.loads(urllib.urlopen("http://ip.jsontest.com/").read())
+		dataip = data['ip']
 	data = urllib.urlopen('http://cs302.pythonanywhere.com/report?username=' + username + '&password=' + password + '&location=' + curLocation + '&ip=' + dataip + '&port=10001')
 	error = data.read()
 	if error[0] is "0":
@@ -95,7 +90,7 @@ def send(jsonDump, ip, port):
 	try:
 		req = urllib2.Request(dest, jsonDump, {'Content-Type':'application/json'})
 		response = urllib2.urlopen(req, timeout=10)
-	except TimeoutError as t:
+	except Error as t:
 		print "Error - person hasn't done this yet - " + t
 	except Error as e:
 		print "Error - " + e
@@ -109,7 +104,7 @@ def reqProfile(jsonDump, ip, port):
 	try:
 		req = urllib2.Request(dest, jsonDump, {'Content-Type':'application/json'})
 		response = urllib2.urlopen(req, timeout=10)
-	except TimeoutError as t:
+	except Error as t:
 		print "Error - person hasn't done this yet - " + t
 	except Error as e:
 		print "Error - " + e
