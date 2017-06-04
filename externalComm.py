@@ -59,7 +59,7 @@ def autoReport(username, password, curLocation):
 		# Get external IP
 		data = json.loads(urllib.urlopen("http://ip.jsontest.com/").read())
 		dataip = data['ip']
-	data = urllib.urlopen('http://cs302.pythonanywhere.com/report?username=' + username + '&password=' + password + '&location=' + curLocation + '&ip=' + dataip + '&port=10001')
+	data = urllib2.urlopen('http://cs302.pythonanywhere.com/report?username=' + username + '&password=' + password + '&location=' + curLocation + '&ip=' + dataip + '&port=10001', timeout=10)
 	error = data.read()
 	if error[0] is "0":
 		return 0
@@ -74,7 +74,7 @@ def autoGetList(user, pw):
 	if user is None:
 		data = "You are not signed in"
 	else:
-		data = urllib.urlopen('http://cs302.pythonanywhere.com/getList?username=' + user + '&password=' + pw + '&enc=0&json=1')
+		data = urllib2.urlopen('http://cs302.pythonanywhere.com/getList?username=' + user + '&password=' + pw + '&enc=0&json=1', timeout=10)
 	return data
 
 
@@ -90,10 +90,10 @@ def send(jsonDump, ip, port):
 	try:
 		req = urllib2.Request(dest, jsonDump, {'Content-Type':'application/json'})
 		response = urllib2.urlopen(req, timeout=10)
-	except Error as t:
-		print "Error - person hasn't done this yet - " + t
-	except Error as e:
-		print "Error - " + e
+	except urllib2.HTTPError, e:
+		print "HTTPError - " + e
+	except urllib2.URLError, e:
+		print "URLError - " + e
 	print response.read()
 	return response
 
@@ -104,8 +104,8 @@ def reqProfile(jsonDump, ip, port):
 	try:
 		req = urllib2.Request(dest, jsonDump, {'Content-Type':'application/json'})
 		response = urllib2.urlopen(req, timeout=10)
-	except Error as t:
-		print "Error - person hasn't done this yet - " + t
-	except Error as e:
-		print "Error - " + e
+	except urllib2.HTTPError, e:
+		print "HTTPError - " + e
+	except urllib2.URLError, e:
+		print "URLError - " + e
 	return response

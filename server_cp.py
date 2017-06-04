@@ -59,6 +59,8 @@ class MainApp(object):
 			Page += '<input type="submit" value="Get Users"/></form>'
 			Page += '<form action="/messageWrite" method="post" enctype="multipart/form-data">'
 			Page += '<input type="submit" value="Send a Message"/></form>'
+			Page += '<form action="/myProfile" method="post" enctype="multipart/form-data">'
+			Page += '<input type="submit" value="Edit Profile"/></form>'
 			Page += '<form action="/userProfile" method="post" enctype="multipart/form-data">'
 			Page += 'User: '
 			Page += '<select name="user" id="customDropdown">'
@@ -66,7 +68,7 @@ class MainApp(object):
 				Page += '<option value=' + i + '>' + i + '</option>'
 			Page += '</select>'
 			Page += '<input type="submit" value="Get Profile"/></form>'
-		except KeyError: #There is no username
+		except (KeyError, TypeError): #There is no username
 			Page += "Click here to <a href='login'>login</a>."
 		# Upon trying to connect to the home page, the server will try to connect to a database
 		# if the database does not exist it will make it and close it
@@ -136,6 +138,9 @@ class MainApp(object):
 			externalComm.toggleAuthority(False)
 			print data.read()
 			cherrypy.lib.sessions.expire()
+			cherrypy.session['username'] = None
+			cherrypy.session['password'] = None
+			cherrypy.session['location'] = None
 		raise cherrypy.HTTPRedirect('/')
 
 
@@ -183,6 +188,13 @@ class MainApp(object):
 		pass
 
 
+	@cherrypy.expose()
+	def myProfile(self):
+		# Fetch values from database
+		Page = 'This page will display data about the user'
+		Page += '<form action="/editProfile" method="post" enctype="multipart/form-data">'
+		Page += '<input type="submit" value="Edit Profile"/></form>'
+
 	@cherrypy.expose
 	def sendMessage(self, destination=None, message=None):
 		epoch_time = float(time.time())
@@ -214,7 +226,8 @@ class MainApp(object):
 		hashpw = hashlib.sha256(password + "COMPSYS302-2017").hexdigest()
 		try:
 			error = externalComm.autoReport(username, hashpw, location)
-		except (KeyError, TypeError):
+		except (KeyError, TypeError) as e:
+			print e
 			raise cherrypy.HTTPRedirect('/login')
 		if error == 0:
 			cherrypy.session['password'] = hashpw
@@ -234,6 +247,7 @@ class MainApp(object):
 			cherrypy.session['location'] = None
 			return 1
 
+	@cherrypy.expose()
 	def userProfile(self, user=None):
 		try:
 			internalComm.profile(user)
