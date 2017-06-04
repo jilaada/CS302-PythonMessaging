@@ -105,7 +105,7 @@ def send(jsonDump, ip, port):
 
 # Send a requestion x address getting their profile
 def reqProfile(jsonDump, ip, port):
-	dest = "http://" + ip + ":" + port + "/getProfile"
+	dest = "http://" + ip + ":" + port + "/getProfile?"
 	try:
 		req = urllib2.Request(dest, jsonDump, {'Content-Type':'application/json'})
 		response = urllib2.urlopen(req, timeout=10)
@@ -113,5 +113,4 @@ def reqProfile(jsonDump, ip, port):
 		print "Error - person hasn't done this yet - " + t
 	except Error as e:
 		print "Error - " + e
-	print response.read()
 	return response

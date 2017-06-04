@@ -31,7 +31,7 @@ from sqlite3 import Error
 def createTable():
 	sql_create_table_usersRegisters = "CREATE TABLE IF NOT EXISTS userRegister (id INTEGER PRIMARY KEY AUTOINCREMENT, upi TEXT UNIQUE, ip TEXT, public_key TEXT, location INTEGER, last_login TEXT, port TEXT); "
 	sql_create_table_messageData = "CREATE TABLE IF NOT EXISTS messageData (id INTEGER PRIMARY KEY AUTOINCREMENT, senderUPI TEXT, destinationUPI TEXT, time_stamp TEXT, message TEXT); "
-	sql_create_table_profile = "CREATE TABLE IF NOT EXISTS userProfile (id INTEGER PRIMARY KEY AUTOINCREMENT, upi TEXT UNIQUE, fullname TEXT, position TEXT, description TEXT, location, TEXT, picture TEXT); "
+	sql_create_table_profile = "CREATE TABLE IF NOT EXISTS userProfile (id INTEGER PRIMARY KEY AUTOINCREMENT, upi TEXT UNIQUE, fullname TEXT, position TEXT, description TEXT, location TEXT, picture TEXT); "
 	conn = connectDatabase()
 	c = conn.cursor()
 	c.execute(sql_create_table_usersRegisters)
@@ -140,6 +140,23 @@ def dropdownGet():
 		print "Error - not able to get users"
 	return 0
 
+
+# Store the profile values into the database
+def storeProfile(profileData, upi):
+	profileData = json.loads(profileData)
+	conn = connectDatabase()
+	conn.row_factory = sqlite3.Row
+	c = conn.cursor()
+	try:
+		# Try assumes that the profile does not already exist
+		sql_insert_profile = 'INSERT INTO userProfile(upi, fullname, position, description, location, picture) VALUES(:upi,:fname,:pos,:desc,:loc,:pic)'
+		c.execute(sql_insert_profile, {"upi":upi, "fname":profileData['fullname'], "pos":profileData['position'], "desc":profileData['description'], "loc":profileData['location'], "pic":profileData['picture']})
+		conn.commit()
+		conn.close()
+	except Error as e:
+		print "here"
+		print json.loads(profileData)
+		print e
 
 # Connect to the database, returns the connection object
 def connectDatabase():

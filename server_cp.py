@@ -198,7 +198,8 @@ class MainApp(object):
 			sent = externalComm.reqProfile(sendData, data["ip"], data["port"])
 			try:
 				# Store values in the database
-				print "here"
+				databaseFunctions.storeProfile(sent.read(), user)
+				#print sent.read()
 			except Error as e:
 				print e
 				print "Profile doesn't exist probably"
