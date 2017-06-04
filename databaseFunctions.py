@@ -31,10 +31,12 @@ from sqlite3 import Error
 def createTable():
 	sql_create_table_usersRegisters = "CREATE TABLE IF NOT EXISTS userRegister (id INTEGER PRIMARY KEY AUTOINCREMENT, upi TEXT UNIQUE, ip TEXT, public_key TEXT, location INTEGER, last_login TEXT, port TEXT); "
 	sql_create_table_messageData = "CREATE TABLE IF NOT EXISTS messageData (id INTEGER PRIMARY KEY AUTOINCREMENT, senderUPI TEXT, destinationUPI TEXT, time_stamp TEXT, message TEXT); "
+	sql_create_table_profile = "CREATE TABLE IF NOT EXISTS userProfile (id INTEGER PRIMARY KEY AUTOINCREMENT, upi TEXT UNIQUE, fullname TEXT, position TEXT, description TEXT, location, TEXT, picture TEXT); "
 	conn = connectDatabase()
 	c = conn.cursor()
 	c.execute(sql_create_table_usersRegisters)
 	c.execute(sql_create_table_messageData)
+	c.execute(sql_create_table_profile)
 	conn.commit()
 	conn.close()
 	pass

@@ -21,6 +21,7 @@ import json
 import sqlite3
 import threading
 import time
+import socket
 import databaseFunctions
 import externalComm
 from sqlite3 import Error
@@ -54,12 +55,20 @@ class MainApp(object):
 		Page = "Welcome! This is a test website for COMPSYS302!<br/>"
 		
 		try:
+			users = databaseFunctions.dropdownGet()
 			Page += "Hello " + cherrypy.session['username'] + "!<br/>"
 			Page += "Here is some bonus text because you've logged in!"
 			Page += '<form action="/usersOnline" method="post" enctype="multipart/form-data">'
 			Page += '<input type="submit" value="Get Users"/></form>'
 			Page += '<form action="/messageWrite" method="post" enctype="multipart/form-data">'
 			Page += '<input type="submit" value="Send a Message"/></form>'
+			Page += '<form action="/profile" method="post" enctype="multipart/form-data">'
+			Page += 'User: '
+			Page += '<select name="user" id="customDropdown">'
+			for i in users:
+				Page += '<option value=' + i + '>' + i + '</option>'
+			Page += '</select>'
+			Page += '<input type="submit" value="Get Profile"/></form>'
 		except KeyError: #There is no username
 			Page += "Click here to <a href='login'>login</a>."
 		# Upon trying to connect to the home page, the server will try to connect to a database 
@@ -90,30 +99,33 @@ class MainApp(object):
 		return Page
 
 
-
 	#The login page for the server
 	@cherrypy.expose
 	def login(self):
 		Page = '<form action="/signin" method="post" enctype="multipart/form-data">'
 		Page += 'Username: <input type="text" name="username"/><br/>'
-		Page += 'Password: <input type="password" name="password"/>'
+		Page += 'Password: <input type="password" name="password"/><br/>'
+		Page += 'Location: '
+		Page += '<select name="location" id="customDropdown">'
+		Page += '<option value=0>Uni Remote Linux</option><br/>'
+		Page += '<option value=1>Uni Wi-Fi</option><br/>'
+		Page += '<option value=2>External IP</option><br/>'
+		Page += '</select><br/>'
 		Page += '<input type="submit" value="Login"/></form>'
 		return Page
 
 
-
-
 	# LOGGING IN AND OUT
 	@cherrypy.expose
-	def signin(self, username=None, password=None):
+	def signin(self, username=None, password=None, location=None):
 		"""Check their name and password and send them either to the main page, or back to the main login screen."""
-		error = self.authoriseUserLogin(username,password)
+		print location
+		error = self.authoriseUserLogin(username,password, location)
 		if error == 0:
 			Page = "Welcome! This is a test website for COMPSYS302! You have logged in!<br/>"
 			return Page
 		else:
 			raise cherrypy.HTTPRedirect('/login')
-
 
 
 	@cherrypy.expose
@@ -130,6 +142,7 @@ class MainApp(object):
 			cherrypy.lib.sessions.expire()
 		raise cherrypy.HTTPRedirect('/')
 
+
 	@cherrypy.expose
 	@cherrypy.tools.json_in()
 	def receiveMessage(self):
@@ -139,6 +152,7 @@ class MainApp(object):
 		print inputMessage
 		return "0"
 
+
 	@cherrypy.expose
 	def messageWrite(self):
 		users = databaseFunctions.dropdownGet()
@@ -147,17 +161,56 @@ class MainApp(object):
 		Page += '<div>'
 		Page += '<select name="destination" id="customDropdown">'
 		for i in users:
-			Page += '<option value=' + i + '>' + i + '</option><br/>'
+			Page += '<option value=' + i + '>' + i + '</option>'
 		Page += '</select>'
 		Page += '</div>'
 		Page += 'Message: <input type="text" name="message"/>'
 		Page += '<input type="submit" value="Send"/></form>'
 		return Page
 
+
+	@cherrypy.expose
+	@cherrypy.tools.json_in()
+	def getProfile(self):
+		inputMessage = cherrypy.request.json
+		username = inputMessage["profile_username"]
+		if username == "jecc724":
+			fullname = "Jilada Eccleston"
+			position = "Occupational Student"
+			description = "I'm at risk of failing this course"
+			location = "Upstairs Lab"
+			picture = "https://pbs.twimg.com/media/CdrOk7LWoAEdT6P.jpg"
+			encoding = int(2)
+			encryption = int(0)
+			output_dict = {"fullname":fullname, "position":position, "description":description, "location":location, "picture":picture, "encoding":encoding, "encryption":encryption}
+			#sendData = json.dumps(output_dict)
+			return json.dumps(output_dict)
+		pass
+
+
+	@cherrypy.expose
+	def profile(self, user=None):
+		user_dict = {"profile_username":user}
+		sendData = json.dumps(user_dict)
+		# Need to get the port and ip of the user
+		data = databaseFunctions.getIP(user)
+		try:
+			sent = externalComm.reqProfile(sendData, data["ip"], data["port"])
+			try:
+				# Store values in the database
+				print "here"
+			except Error as e:
+				print e
+				print "Profile doesn't exist probably"
+		except Error as e:
+			print e
+		raise cherrypy.HTTPRedirect('/')
+
+
 	@cherrypy.expose
 	def sendMessage(self, destination=None, message=None):
 		epoch_time = float(time.time())
-		output_dict = {"sender":"jecc724", "destination":destination, "message":message, "stamp":epoch_time}
+		output_dict = {"sender":"jecc724", "destination":destination, "message":message, "stamp":epoch_time, "encoding":2}
 		ins = databaseFunctions.insertMessage(output_dict)
 		if ins == 1:
 			print "Error - Message did not store properly"
@@ -169,6 +222,10 @@ class MainApp(object):
 			else:
 				try:
 					sent = externalComm.send(sendData, data["ip"], data["port"])
+					try:
+						print sent.read()
+					except Error as e:
+						print e
 				except Error as e:
 					raise cherrypy.HTTPRedirect('/')
 		except Error as e:
@@ -179,19 +236,25 @@ class MainApp(object):
 	# Private functions  
 	# =================
 
-	def authoriseUserLogin(self, username, password):
+	def authoriseUserLogin(self, username, password, location):
 		# Get hash of password
 		hashpw = hashlib.sha256(password + "COMPSYS302-2017").hexdigest()
-		ipadd = cherrypy.request.remote.ip
-		dataip = json.loads(urllib.urlopen("http://ip.jsontest.com/").read())
+		if location == "0":
+			# Get internal IP
+			dataip = socket.gethostbyname(socket.gethostname())
+		else:
+			# Get external IP 
+			ipadd = cherrypy.request.remote.ip
+			dataip = json.loads(urllib.urlopen("http://ip.jsontest.com/").read())
 		try:
-			data = urllib.urlopen('http://cs302.pythonanywhere.com/report?username=' + username + '&password=' + hashpw + '&location=0&ip=' + '10.103.137.64' + '&port=10001')
+			data = urllib.urlopen('http://cs302.pythonanywhere.com/report?username=' + username + '&password=' + hashpw + '&location=' + location + '&ip=' + dataip + '&port=10001')
 		except KeyError:
 			raise cherrypy.HTTPRedirect('/login')
 		if data.read() == "0, User and IP logged":
 			cherrypy.session['password'] = hashpw
 			cherrypy.session['username'] = username
-			t = threading.Thread(target=externalComm.externReport, args=(cherrypy.session['username'], cherrypy.session['password'],))
+			cherrypy.session['location'] = location
+			t = threading.Thread(target=externalComm.externReport, args=(cherrypy.session['username'], cherrypy.session['password'], cherrypy.session['location']))
 			cherrypy.session['threadOne'] = t
 			t.daemon = True
 			externalComm.toggleAuthority(True)
