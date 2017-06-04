@@ -202,7 +202,6 @@ class MainApp(object):
 				#print sent.read()
 			except Error as e:
 				print e
-				print "Profile doesn't exist probably"
 		except Error as e:
 			print e
 		raise cherrypy.HTTPRedirect('/')
@@ -256,10 +255,10 @@ class MainApp(object):
 			cherrypy.session['username'] = username
 			cherrypy.session['location'] = location
 			t = threading.Thread(target=externalComm.externReport, args=(cherrypy.session['username'], cherrypy.session['password'], cherrypy.session['location']))
-			cherrypy.session['threadOne'] = t
 			t.daemon = True
 			externalComm.toggleAuthority(True)
 			t.start()
+			print "--- THREAD STARTING ---"
 			return 0
 		else:
 			cherrypy.session['password'] = None

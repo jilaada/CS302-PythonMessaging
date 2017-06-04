@@ -29,21 +29,21 @@ toggleThread = False
 
 # External report tied to the thread
 def externReport(curUser, curPw, curLocation):
-	while(1):
+	while toggleThread:
 		# Need to try and report information to the login server as well as update the table list
 		# Need to confirm thaat the user is logged in
 		# If the username and the password as not none then they are logged in
-		if toggleThread:
-			# do something
-			try:
-				error = autoReport(curUser, curPw, curLocation)
-				usersOnline(curUser, curPw)
-				print "You are online - " + curUser
-			except Error as e:
-				print e
-				print "Something went wrong here"
-			print "Reporting"
+		# do something
+		try:
+			error = autoReport(curUser, curPw, curLocation)
+			usersOnline(curUser, curPw)
+			print "ONLINE - " + curUser
+		except Error as e:
+			print e
+			print "Something went wrong here"
+		print "REPORTING"
 		time.sleep(25)
+	print "THREAD ENDING --- SIGNED OUT"
 
 
 # Toggle whether or not the function thread should report the credentials

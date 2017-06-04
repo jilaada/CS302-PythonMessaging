@@ -155,7 +155,6 @@ def storeProfile(profileData, upi):
 		conn.close()
 	except Error as e:
 		print "here"
-		print json.loads(profileData)
 		print e
 
 # Connect to the database, returns the connection object
