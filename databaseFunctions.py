@@ -149,7 +149,11 @@ def storeProfile(profileData, upi):
 		conn.close()
 	except Error as e:
 		try:
-			sql_update_profile = 'UPDATE userProfile SET fullname = IFNULL((SELECT fullname FROM userProfile WHERE upi==:upi), :fullname), position==:pos, description==:desc, location==:loc, picture==:pic WHERE upi==:upi'
+			sql_update_profile = 'UPDATE userProfile SET fullname = IFNULL((SELECT fullname FROM userProfile WHERE upi==:upi), :fullname), ' \
+			                     'position = IFNULL((SELECT position FROM userProfile WHERE upi==:upi), :pos), ' \
+			                     'description = IFNULL((SELECT description FROM userProfile WHERE upi==:upi), :desc), ' \
+			                     'location = IFNULL((SELECT location FROM userProfile WHERE upi==:upi), :loc), ' \
+			                     'picture = IFNULL((SELECT picture FROM userProfile WHERE upi==:upi), :pic) WHERE upi==:upi'
 			c.execute(sql_update_profile, {"upi": upi, "fullname": profileData['fullname'], "pos": profileData['position'],
 		                               "desc": profileData['description'], "loc": profileData['location'],
 		                               "pic": profileData['picture']})
@@ -168,8 +172,7 @@ def getProfile(user):
 		c.execute(sql_select_profile, {"user":user})
 		profile = c.fetchone()
 		conn.close()
-		print profile
-		return 0
+		return profile
 	except (KeyError, TypeError) as e:
 		print "Error - " + e
 		return 1
