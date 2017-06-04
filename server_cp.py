@@ -183,7 +183,8 @@ class MainApp(object):
 			picture = "https://pbs.twimg.com/media/CdrOk7LWoAEdT6P.jpg"
 			encoding = int(2)
 			encryption = int(0)
-			output_dict = {"fullname":fullname, "position":position, "description":description, "location":location, "picture":picture, "encoding":encoding, "encryption":encryption}
+			output_dict = {"fullname":fullname, "position":position, "description":description,
+			               "location":location, "picture":picture, "encoding":encoding, "encryption":encryption}
 			return json.dumps(output_dict)
 		pass
 
@@ -191,9 +192,30 @@ class MainApp(object):
 	@cherrypy.expose()
 	def myProfile(self):
 		# Fetch values from database
-		Page = 'This page will display data about the user'
+		print databaseFunctions.getProfile(cherrypy.session['username'])
+		Page = 'This page will display data about the user</br></br>'
+		Page += 'Name : </br>'
+		Page += 'Profile Picture : </br>'
+		Page += 'Location : </br>'
+		Page += 'Position : </br>'
+		Page += 'Description : </br>'
 		Page += '<form action="/editProfile" method="post" enctype="multipart/form-data">'
 		Page += '<input type="submit" value="Edit Profile"/></form>'
+		return Page
+
+
+	@cherrypy.expose()
+	def editProfile(self):
+		Page = 'This page will display data about the user</br></br>'
+		Page += '<form action="/saveProfile" method="post" enctype="multipart/form-data">'
+		Page += 'Name: <input type="text" name="fullname"/><br/>'
+		Page += 'Location: <input type="text" name="location"/><br/>'
+		Page += 'Position: <input type="text" name="position"/><br/>'
+		Page += 'Description: <input type="text" name="description"/><br/>'
+		Page += 'Picture: <input type="text" name="picture"/><br/>'
+		Page += '<input type="submit" value="Save Profile"/></form>'
+		return Page
+
 
 	@cherrypy.expose
 	def sendMessage(self, destination=None, message=None):
@@ -211,11 +233,32 @@ class MainApp(object):
 				try:
 					sent = externalComm.send(sendData, data["ip"], data["port"])
 					print sent
-				except KeyError as e:
+				except KeyError:
 					raise cherrypy.HTTPRedirect('/')
 		except (KeyError, TypeError) as e:
 			print e
 		raise cherrypy.HTTPRedirect('/messageWrite')
+
+
+	@cherrypy.expose()
+	def userProfile(self, user=None):
+		try:
+			internalComm.profile(user)
+			raise cherrypy.HTTPRedirect('/')
+		except (KeyError, TypeError):
+			raise cherrypy.HTTPRedirect('/')
+
+
+	@cherrypy.expose()
+	def saveProfile(self, fullname=None, location=None, position=None, description=None, picture=None):
+		output_dict = {"fullname": fullname, "position": position, "description": description, "location": location, "picture": picture}
+		json_dump = json.dumps(output_dict)
+		try:
+			databaseFunctions.storeProfile(json_dump, cherrypy.session['username'])
+		except Error as e:
+			print e
+		raise cherrypy.HTTPRedirect('/myProfile')
+
 
 	# =================
 	# Private functions
@@ -247,13 +290,7 @@ class MainApp(object):
 			cherrypy.session['location'] = None
 			return 1
 
-	@cherrypy.expose()
-	def userProfile(self, user=None):
-		try:
-			internalComm.profile(user)
-			raise cherrypy.HTTPRedirect('/')
-		except (KeyError, TypeError):
-			raise cherrypy.HTTPRedirect('/')
+
 
 def runMainApp():
 	# Create an instance of MainApp and tell Cherrypy to send all requests under / to it. (ie all of them)

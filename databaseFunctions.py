@@ -148,8 +148,32 @@ def storeProfile(profileData, upi):
 		conn.commit()
 		conn.close()
 	except Error as e:
-		print "here"
-		print e
+		try:
+			sql_update_profile = 'UPDATE userProfile SET fullname = IFNULL((SELECT fullname FROM userProfile WHERE upi==:upi), :fullname), position==:pos, description==:desc, location==:loc, picture==:pic WHERE upi==:upi'
+			c.execute(sql_update_profile, {"upi": upi, "fullname": profileData['fullname'], "pos": profileData['position'],
+		                               "desc": profileData['description'], "loc": profileData['location'],
+		                               "pic": profileData['picture']})
+			conn.commit()
+			conn.close()
+		except Error as e:
+			print "here"
+			print e
+
+def getProfile(user):
+	conn = connectDatabase()
+	conn.row_factory = sqlite3.Row
+	c = conn.cursor()
+	try:
+		sql_select_profile = 'SELECT * FROM userProfile WHERE upi=:user'
+		c.execute(sql_select_profile, {"user":user})
+		profile = c.fetchone()
+		conn.close()
+		print profile
+		return 0
+	except (KeyError, TypeError) as e:
+		print "Error - " + e
+		return 1
+
 
 # Connect to the database, returns the connection object
 def connectDatabase():
