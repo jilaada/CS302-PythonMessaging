@@ -5,7 +5,12 @@ html, body {
     font: 300 16px/25px "Myriad Set Pro", sans-serif;
 }
 
-ul, #title-block {
+#title-block {
+    margin-top: 0;
+    padding: 0;
+}
+
+#top-nav {
     list-style-type: none;
     margin-top: 0;
     padding: 0;
@@ -75,4 +80,22 @@ button:hover {
 
 label {
     font: 300 24px/33px "Myriad Set Pro", sans-serif;
+}
+
+#dash {
+    margin-right: 80%;
+    margin-top: 53px;
+    padding: 0;
+}
+
+#side-nav {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    width: 20%;
+    background-color: #f1f1f1;
+    color: black;
+    height: 100%; /* Full height */
+    position: fixed; /* Make it stick, even on scroll */
+    overflow: auto; /* Enable scrolling if the sidenav has too much content */
 }
