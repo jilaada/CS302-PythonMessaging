@@ -1,4 +1,11 @@
-ul {
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font: 300 18px/27px "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+ul, #title-block {
     list-style-type: none;
     margin-top: 0;
     padding: 0;
@@ -7,10 +14,6 @@ ul {
     position: fixed;
     top: 0;
     width: 100%;
-}
-
-li {
-    float: left;
 }
 
 li a {
@@ -30,12 +33,41 @@ li a:hover {
     background-color: #4CAF50;
 }
 
-body{
+form {
+    border: 3px solid #f1f1f1;
+    padding: 10px;
     margin: 0;
-    padding: 0;
+    align-content: center;
+    width: 20%;
 }
 
-h1 {
-	margin: 0;
-    padding: 0;
+input[type=text], input[type=password] {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
 }
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+}
+
+button:hover {
+    opacity: 0.8;
+}
+
+#signin {
+    margin-top: 55px;
+    padding-top: 45px;
+    height: auto;
+}
+
+

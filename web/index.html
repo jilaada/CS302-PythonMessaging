@@ -10,25 +10,31 @@ AUTHOR: JILADA ECCLESTON
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta http-equiv="refresh" content="30">
-
     <title>Talkie</title>
-    
-    <link rel="stylesheet" href="/main.css">
+    <link rel="stylesheet" href="css/main.css">
 </head>
 
 <body>
-	<div id="title-block" class="title-block">
-    	<ul>
-        	<li style="float:right"><a href="about.html">About</a></li>
-        	<li style="float:right"><a href="signin.html">Sign In</a></li>
-        	<li style="float:right"><a class="active" href="index.html">Home</a></li>
-    	</ul> 
+	<div class="container">
+		<div id="title-block">
+			<ul>
+				<li style="float:right"><a href="about.html">About</a></li>
+				<li style="float:right"><a href="signout.html">Sign In</a></li>
+				<li style="float:right"><a class="active" href="index.html">Home</a></li>
+			</ul>
+		</div>
+		<div align="center" id="signin">
+			 <form action="/signin">
+				 <input type="text" placeholder="Username" name="username" required>
+				 <input type="password" placeholder="Password" name="password" required>
+				 <button type="submit">Login</button>
+			 </form>
+		</div>
 	</div>
 
-<h1>header</h1>
-
-<p></p>
-
 </body>
+<script>
+
+</script>
 </html>
 
