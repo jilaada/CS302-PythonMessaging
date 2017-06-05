@@ -98,6 +98,20 @@ def send(jsonDump, ip, port):
 	return response
 
 
+# Send the message data to the users
+def sendFile(jsonDump, ip, port):
+	dest = "http://" + ip + ":" + port + "/receiveFile"
+	try:
+		req = urllib2.Request(dest, jsonDump, {'Content-Type':'application/json'})
+		response = urllib2.urlopen(req, timeout=10)
+	except urllib2.HTTPError, e:
+		print "HTTPError - " + e
+	except urllib2.URLError, e:
+		print "URLError - " + e
+	print response.read()
+	return response
+
+
 # Send a requestion x address getting their profile
 def reqProfile(jsonDump, ip, port):
 	dest = "http://" + ip + ":" + port + "/getProfile?"

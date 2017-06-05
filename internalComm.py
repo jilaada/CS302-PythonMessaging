@@ -31,3 +31,7 @@ def profile(user):
 	except KeyError as e:
 		print e
 	return 0
+
+# Function that will get the file and save it in directory
+def saveFile(jsonDump):
+	pass

@@ -11,6 +11,7 @@
 #            Python  (We use 2.7)
 
 import cherrypy
+from cherrypy.lib import static
 import urllib
 import hashlib
 import sys
@@ -18,10 +19,17 @@ import json
 import sqlite3
 import threading
 import time
+import os
+import os.path
+import base64
 import databaseFunctions
 import externalComm
 import internalComm
 from sqlite3 import Error
+
+# Getting directory
+localDir = os.path.dirname(__file__)
+absDir = os.path.join(os.getcwd(), localDir)
 
 # The address we listen for connections on
 listen_ip = "0.0.0.0"
@@ -59,6 +67,8 @@ class MainApp(object):
 			Page += '<input type="submit" value="Get Users"/></form>'
 			Page += '<form action="/messageWrite" method="post" enctype="multipart/form-data">'
 			Page += '<input type="submit" value="Send a Message"/></form>'
+			Page += '<form action="/openFile" method="post" enctype="multipart/form-data">'
+			Page += '<input type="submit" value="Send a File"/></form>'
 			Page += '<form action="/myProfile" method="post" enctype="multipart/form-data">'
 			Page += '<input type="submit" value="My Profile"/></form>'
 			Page += '<form action="/userProfile" method="post" enctype="multipart/form-data">'
@@ -147,7 +157,6 @@ class MainApp(object):
 	@cherrypy.tools.json_in()
 	def receiveMessage(self):
 		inputMessage = cherrypy.request.json
-		# Need some way of taking this message and saving it in the database
 		databaseFunctions.insertMessage(inputMessage)
 		print inputMessage
 		return "0"
@@ -168,6 +177,52 @@ class MainApp(object):
 		Page += '<input type="submit" value="Send"/></form>'
 		return Page
 
+
+	@cherrypy.expose
+	@cherrypy.tools.json_in()
+	def receiveFile(self):
+		inputMessage = cherrypy.request.json
+		# decode the json file
+		print inputMessage
+
+
+	@cherrypy.expose
+	def openFile(self):
+		users = databaseFunctions.dropdownGet()
+		Page = '<form action="/sendFile" method="post" enctype="multipart/form-data">'
+		Page += 'Receiver: '
+		Page += '<div>'
+		Page += '<select name="destination" id="customDropdown">'
+		for i in users:
+			Page += '<option value=' + i + '>' + i + '</option>'
+		Page += '</select>'
+		Page += '</div>'
+		Page += 'Specify a file: </br>'
+		Page += '<input type="file" name="dataFile"/></br>'
+		Page += '<input type="submit" value="Send"/></form>'
+		return Page
+
+
+	# leave this until Hamish
+	@cherrypy.expose
+	def sendFile(self, destination=None, dataFile=None):
+		sender = cherrypy.session['username']
+		epoch_time = float(time.time())
+		hashing = int(0)
+		size = 0
+		try:
+			data = dataFile.file.read()
+			base64data = base64.encodestring(data)
+			output_dict = {"sender":sender, "destination":destination, "file":base64data, "filename":(dataFile.filename), "content_type":str(dataFile.content_type), "stamp":epoch_time, "hashing":hashing}
+			out_json = json.dumps(output_dict)
+			try:
+				ipdata = databaseFunctions.getIP(destination)
+				send = externalComm.sendFile(out_json, ipdata["ip"], ipdata["port"])
+			except Error as e:
+				print e
+		except Error as e:
+			print e
+		pass
 
 	@cherrypy.expose
 	@cherrypy.tools.json_in()
@@ -202,13 +257,14 @@ class MainApp(object):
 
 	@cherrypy.expose()
 	def editProfile(self):
+		profileData = databaseFunctions.getProfile(cherrypy.session['username'])
 		Page = 'This page will display data about the user</br></br>'
 		Page += '<form action="/saveProfile" method="post" enctype="multipart/form-data">'
-		Page += 'Name: <input type="text" name="fullname"/><br/>'
-		Page += 'Location: <input type="text" name="location"/><br/>'
-		Page += 'Position: <input type="text" name="position"/><br/>'
-		Page += 'Description: <input type="text" name="description"/><br/>'
-		Page += 'Picture: <input type="text" name="picture"/><br/>'
+		Page += 'Name: <input type="text" name="fullname" value="' + profileData['fullname'] + '"/><br/>'
+		Page += 'Location: <input type="text" name="location" value="' + profileData['location'] + '"/><br/>'
+		Page += 'Position: <input type="text" name="position" value="' + profileData['position'] + '"/><br/>'
+		Page += 'Description: <input type="text" name="description" value="' + profileData['description'] + '"/><br/>'
+		Page += 'Picture: <input type="text" name="picture" value="' + profileData['picture'] + '"/><br/>'
 		Page += '<input type="submit" value="Save Profile"/></form>'
 		return Page
 
@@ -255,6 +311,20 @@ class MainApp(object):
 			print e
 		raise cherrypy.HTTPRedirect('/myProfile')
 
+	# =================
+	# Other functions
+	# =================
+
+	@cherrypy.expose()
+	def listAPI(self):
+		output_dict = "/<receiveMessage>[sender][destination][message][stamp]/<getProfile>[profile_username]/<ping>[sender]Encoding<2>Encryption<0>Hashing<0>"
+		return output_dict
+
+
+	@cherrypy.expose()
+	def ping(self, sender):
+		databaseFunctions.pingRefresh(sender)
+		return 0
 
 	# =================
 	# Private functions

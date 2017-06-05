@@ -69,7 +69,23 @@ def refreshDatabase(onlineUsers):
 	conn.close()
 	return dic
 
+def pingRefresh(sender):
+	conn = connectDatabase()
+	c = conn.cursor()
+	epochtime = float(time.time())
+	try:
+		sql_update_user = 'UPDATE userRegister SET time_stamp==:time WHERE upi==:username'
+		c.execute(sql_update_user, {"time":epochtime, "username":sender})
+	except KeyError as e:
+		print e
+		conn.close()
+		return 1
+	conn.commit()
+	conn.close()
+	return 0
+
 # Refresh the message database so that messages are stored in teh database
+# Need to add stuff to do with the hashing etc.
 def insertMessage(messageData):
 	conn = connectDatabase()
 	c = conn.cursor()
@@ -82,13 +98,19 @@ def insertMessage(messageData):
 				sql_insert_message = 'INSERT INTO messageData (senderUPI, time_stamp, message, destinationUPI) VALUES (:username, :time_stamp, :message, :destination)'
 				c.execute(sql_insert_message, {"username":messageData['sender'], "time_stamp":messageData['stamp'], "message":messageData['message'], "destination":messageData['destination']})
 				conn.commit()
+			except (KeyError, TypeError) as e:
+				print e
+				conn.close()
+				return 1
 			except Error as e:
 				print e
+				conn.close()
+				return 4
 		else:
 			print "Message saved already"
 	except Error as e:
 		print e
-		return 1
+		return 4
 	conn.close()
 	return 0
 
@@ -149,19 +171,17 @@ def storeProfile(profileData, upi):
 		conn.close()
 	except Error as e:
 		try:
-			print "I'm here"
-			sql_update_profile = 'UPDATE userProfile SET fullname = IFNULL(:fullname, (SELECT fullname FROM userProfile WHERE upi==:upi)), ' \
-			                     'position = IFNULL(:pos, (SELECT position FROM userProfile WHERE upi==:upi)), ' \
-			                     'description = IFNULL(:desc, (SELECT description FROM userProfile WHERE upi==:upi)), ' \
-			                     'location = IFNULL(:loc, (SELECT location FROM userProfile WHERE upi==:upi)), ' \
-			                     'picture = IFNULL(:pic, (SELECT picture FROM userProfile WHERE upi==:upi)) WHERE upi==:upi'
+			sql_update_profile = 'UPDATE userProfile SET fullname = :fullname, ' \
+			                     'position = :pos, ' \
+			                     'description = :desc, ' \
+			                     'location = :loc, ' \
+			                     'picture = :pic WHERE upi==:upi'
 			c.execute(sql_update_profile, {"upi": upi, "fullname": profileData['fullname'], "pos": profileData['position'],
 		                               "desc": profileData['description'], "loc": profileData['location'],
 		                               "pic": profileData['picture']})
 			conn.commit()
 			conn.close()
 		except Error as e:
-			print "here"
 			print e
 			return 1
 	return 0
