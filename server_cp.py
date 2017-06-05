@@ -60,7 +60,7 @@ class MainApp(object):
 			Page += '<form action="/messageWrite" method="post" enctype="multipart/form-data">'
 			Page += '<input type="submit" value="Send a Message"/></form>'
 			Page += '<form action="/myProfile" method="post" enctype="multipart/form-data">'
-			Page += '<input type="submit" value="Edit Profile"/></form>'
+			Page += '<input type="submit" value="My Profile"/></form>'
 			Page += '<form action="/userProfile" method="post" enctype="multipart/form-data">'
 			Page += 'User: '
 			Page += '<select name="user" id="customDropdown">'
@@ -118,10 +118,9 @@ class MainApp(object):
 	@cherrypy.expose
 	def signin(self, username=None, password=None, location=None):
 		"""Check their name and password and send them either to the main page, or back to the main login screen."""
-		error = self.authoriseUserLogin(username,password, location)
+		error = self.authoriseUserLogin(username, password, location)
 		if error == 0:
-			Page = "Welcome! This is a test website for COMPSYS302! You have logged in!<br/>"
-			return Page
+			raise cherrypy.HTTPRedirect('/')
 		else:
 			raise cherrypy.HTTPRedirect('/login')
 
@@ -174,17 +173,13 @@ class MainApp(object):
 	@cherrypy.tools.json_in()
 	def getProfile(self):
 		inputMessage = cherrypy.request.json
-		username = inputMessage["profile_username"]
-		if username == "jecc724":
-			fullname = "Jilada Eccleston"
-			position = "Occupational Student"
-			description = "I'm at risk of failing this course"
-			location = "Upstairs Lab"
-			picture = "https://pbs.twimg.com/media/CdrOk7LWoAEdT6P.jpg"
+		user = inputMessage["profile_username"]
+		if user == "jecc724":
+			profileData = databaseFunctions.getProfile(user)
 			encoding = int(2)
 			encryption = int(0)
-			output_dict = {"fullname":fullname, "position":position, "description":description,
-			               "location":location, "picture":picture, "encoding":encoding, "encryption":encryption}
+			output_dict = {"fullname":profileData['fullname'], "position":profileData['position'], "description":profileData['description'],
+			               "location":profileData['location'], "picture":profileData['picture'], "encoding":encoding, "encryption":encryption}
 			return json.dumps(output_dict)
 		pass
 
@@ -192,13 +187,14 @@ class MainApp(object):
 	@cherrypy.expose()
 	def myProfile(self):
 		# Fetch values from database
-		print databaseFunctions.getProfile(cherrypy.session['username'])
+		profileData = databaseFunctions.getProfile(cherrypy.session['username'])
 		Page = 'This page will display data about the user</br></br>'
-		Page += 'Name : </br>'
+		Page += 'Name : ' + profileData['fullname'] + '</br>'
 		Page += 'Profile Picture : </br>'
-		Page += 'Location : </br>'
-		Page += 'Position : </br>'
-		Page += 'Description : </br>'
+		Page += '<img src="' + profileData['picture'] + '" alt="Doggo"></br>'
+		Page += 'Location : ' + profileData['location'] + '</br>'
+		Page += 'Position : ' + profileData['position'] + '</br>'
+		Page += 'Description : ' + profileData['description'] + '</br>'
 		Page += '<form action="/editProfile" method="post" enctype="multipart/form-data">'
 		Page += '<input type="submit" value="Edit Profile"/></form>'
 		return Page
@@ -275,6 +271,7 @@ class MainApp(object):
 		if error == 0:
 			cherrypy.session['password'] = hashpw
 			cherrypy.session['username'] = username
+			print cherrypy.session['username']
 			cherrypy.session['location'] = location
 			t = threading.Thread(target=externalComm.externReport, args=(cherrypy.session['username'], cherrypy.session['password'], cherrypy.session['location']))
 			t.daemon = True

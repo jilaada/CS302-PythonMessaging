@@ -149,11 +149,12 @@ def storeProfile(profileData, upi):
 		conn.close()
 	except Error as e:
 		try:
-			sql_update_profile = 'UPDATE userProfile SET fullname = IFNULL((SELECT fullname FROM userProfile WHERE upi==:upi), :fullname), ' \
-			                     'position = IFNULL((SELECT position FROM userProfile WHERE upi==:upi), :pos), ' \
-			                     'description = IFNULL((SELECT description FROM userProfile WHERE upi==:upi), :desc), ' \
-			                     'location = IFNULL((SELECT location FROM userProfile WHERE upi==:upi), :loc), ' \
-			                     'picture = IFNULL((SELECT picture FROM userProfile WHERE upi==:upi), :pic) WHERE upi==:upi'
+			print "I'm here"
+			sql_update_profile = 'UPDATE userProfile SET fullname = IFNULL(:fullname, (SELECT fullname FROM userProfile WHERE upi==:upi)), ' \
+			                     'position = IFNULL(:pos, (SELECT position FROM userProfile WHERE upi==:upi)), ' \
+			                     'description = IFNULL(:desc, (SELECT description FROM userProfile WHERE upi==:upi)), ' \
+			                     'location = IFNULL(:loc, (SELECT location FROM userProfile WHERE upi==:upi)), ' \
+			                     'picture = IFNULL(:pic, (SELECT picture FROM userProfile WHERE upi==:upi)) WHERE upi==:upi'
 			c.execute(sql_update_profile, {"upi": upi, "fullname": profileData['fullname'], "pos": profileData['position'],
 		                               "desc": profileData['description'], "loc": profileData['location'],
 		                               "pic": profileData['picture']})
@@ -162,6 +163,8 @@ def storeProfile(profileData, upi):
 		except Error as e:
 			print "here"
 			print e
+			return 1
+	return 0
 
 def getProfile(user):
 	conn = connectDatabase()
@@ -175,7 +178,7 @@ def getProfile(user):
 		return profile
 	except (KeyError, TypeError) as e:
 		print "Error - " + e
-		return 1
+		return 0
 
 
 # Connect to the database, returns the connection object
