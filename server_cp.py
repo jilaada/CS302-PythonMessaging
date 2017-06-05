@@ -79,6 +79,7 @@ class MainApp(object):
 			Page += '</select>'
 			Page += '<input type="submit" value="Get Profile"/></form>'
 		except (KeyError, TypeError): #There is no username
+			# WHEN SOMEONE FIRST OPENS THE PAGE AFTER SERVER INITIALISATION GO TO LOG IN PAGE
 			Page += "Click here to <a href='login'>login</a>."
 		# Upon trying to connect to the home page, the server will try to connect to a database
 		# if the database does not exist it will make it and close it

@@ -2,7 +2,7 @@ html, body {
     margin: 0;
     padding: 0;
     height: 100%;
-    font: 300 18px/27px "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font: 300 16px/25px "Myriad Set Pro", sans-serif;
 }
 
 ul, #title-block {
@@ -39,6 +39,7 @@ form {
     margin: 0;
     align-content: center;
     width: 20%;
+    /*font: 300 16px/25px "Myriad Set Pro", sans-serif;*/
 }
 
 input[type=text], input[type=password] {
@@ -48,6 +49,7 @@ input[type=text], input[type=password] {
     display: inline-block;
     border: 1px solid #ccc;
     box-sizing: border-box;
+    font: 300 14px/23px "Myriad Set Pro", sans-serif;
 }
 
 button {
@@ -58,6 +60,7 @@ button {
     border: none;
     cursor: pointer;
     width: 100%;
+    font: 300 14px/23px "Myriad Set Pro", sans-serif;
 }
 
 button:hover {
@@ -70,4 +73,6 @@ button:hover {
     height: auto;
 }
 
-
+label {
+    font: 300 24px/33px "Myriad Set Pro", sans-serif;
+}
