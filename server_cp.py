@@ -59,7 +59,6 @@ class MainApp(object):
 	@cherrypy.expose
 	def index(self):
 		Page = "Welcome! This is a test website for COMPSYS302!<br/>"
-
 		try:
 			users = databaseFunctions.dropdownGet()
 			Page += "Hello " + cherrypy.session['username'] + "!<br/>"
@@ -226,6 +225,7 @@ class MainApp(object):
 			print e
 		pass
 
+
 	@cherrypy.expose
 	@cherrypy.tools.json_in()
 	def getProfile(self):
@@ -327,6 +327,13 @@ class MainApp(object):
 	def ping(self, sender):
 		databaseFunctions.pingRefresh(sender)
 		return 0
+
+
+	@cherrypy.expose
+	@cherrypy.tools.json_in()
+	def handshake(self):
+		inputMessage = cherrypy.request.json
+		pass
 
 	# =================
 	# Private functions
