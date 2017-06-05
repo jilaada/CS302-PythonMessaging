@@ -118,8 +118,11 @@ def reqProfile(jsonDump, ip, port):
 	try:
 		req = urllib2.Request(dest, jsonDump, {'Content-Type':'application/json'})
 		response = urllib2.urlopen(req, timeout=10)
+		print response
 	except urllib2.HTTPError, e:
 		print "HTTPError - " + e
 	except urllib2.URLError, e:
 		print "URLError - " + e
+	except Error as e:
+		print e
 	return response

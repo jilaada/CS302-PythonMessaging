@@ -12,6 +12,7 @@
 
 import cherrypy
 import json
+import base64
 import databaseFunctions
 import externalComm
 from sqlite3 import Error
@@ -34,4 +35,12 @@ def profile(user):
 
 # Function that will get the file and save it in directory
 def saveFile(jsonDump):
-	pass
+	try:
+		f = open("web/downloads/"+jsonDump['filename'], "w")
+		data = base64.base64decode(jsonDump['file'])
+		f.write(data)
+		f.close()
+	except (KeyError, TypeError) as e:
+		print "Error - " + e
+		return 1
+	return 0

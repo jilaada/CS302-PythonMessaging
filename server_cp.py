@@ -43,6 +43,7 @@ class MainApp(object):
 	_cp_config = {'tools.encode.on': True,
 				  'tools.encode.encoding': 'utf-8',
 				  'tools.sessions.on': 'True',
+				  'tools.staticdir.dir': os.path.abspath(os.getcwd()),
 				 }
 
 	# Function will be called when the user decides to go someone unspecified by the system
@@ -181,9 +182,10 @@ class MainApp(object):
 	@cherrypy.expose
 	@cherrypy.tools.json_in()
 	def receiveFile(self):
-		inputMessage = cherrypy.request.json
-		# decode the json file
-		print inputMessage
+		inputFile = cherrypy.request.json
+		internalComm.saveFile(inputFile)
+		print inputFile
+		return "0"
 
 
 	@cherrypy.expose
@@ -317,7 +319,7 @@ class MainApp(object):
 
 	@cherrypy.expose()
 	def listAPI(self):
-		output_dict = "/<receiveMessage>[sender][destination][message][stamp]/<getProfile>[profile_username]/<ping>[sender]Encoding<2>Encryption<0>Hashing<0>"
+		output_dict = "/<receiveMessage>[sender][destination][message][stamp]/<getProfile>[profile_username]/<ping>[sender]Encoding/<receiveFile>[sender][destination][file]<2>Encryption<0>Hashing<0>"
 		return output_dict
 
 
