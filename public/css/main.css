@@ -5,12 +5,12 @@ html, body {
     font: 300 16px/25px "Myriad Set Pro", sans-serif;
 }
 
-#title-block {
+.title-block {
     margin-top: 0;
     padding: 0;
 }
 
-#top-nav {
+.top-nav {
     list-style-type: none;
     margin-top: 0;
     padding: 0;
@@ -31,7 +31,8 @@ li a {
 
 /* Change the link color to #111 (black) on hover */
 li a:hover {
-    background-color: #111;
+    background-color: #444;
+    color:#FFF;
 }
 
 .active {
@@ -65,7 +66,7 @@ button {
     border: none;
     cursor: pointer;
     width: 100%;
-    font: 300 14px/23px "Myriad Set Pro", sans-serif;
+    font: 300 16px/25px "Myriad Set Pro", sans-serif;
 }
 
 button:hover {
@@ -95,7 +96,16 @@ label {
     width: 20%;
     background-color: #f1f1f1;
     color: black;
-    height: 100%; /* Full height */
-    position: fixed; /* Make it stick, even on scroll */
-    overflow: auto; /* Enable scrolling if the sidenav has too much content */
+    height: 100%;
+    position: fixed;
+    overflow: auto;
+}
+
+.side {
+	color: black;
+}
+
+.select {
+	width: 100%;
+	margin: 8px 0;
 }

@@ -16,17 +16,22 @@ AUTHOR: JILADA ECCLESTON
 
 <body>
 	<div class="container">
-		<div id="title-block">
-			<ul id="top-nav">
+		<div class="title-block">
+			<ul class="top-nav">
 				<li style="float:right"><a class="active" href="index.html">Home</a></li>
 			</ul>
 		</div>
 		<div align="center" id="signin">
 			 <form action="/signin">
-				 <label>Talkie Chat</label>
-				 <input type="text" placeholder="Username" name="username" required>
-				 <input type="password" placeholder="Password" name="password" required>
-				 <button type="submit">Login</button>
+				<label>Talkie Chat</label>
+				<input type="text" placeholder="Username" name="username" required>
+				<input type="password" placeholder="Password" name="password" required>
+				<select class="select" name="location" id="customDropdown">
+					<option value=0>Uni Remote Linux</option><br/>
+					<option value=1>Uni Wi-Fi</option><br/>
+					<option value=2>External IP</option><br/>
+				</select><br/>
+				<button type="submit">Login</button>
 			 </form>
 		</div>
 	</div>

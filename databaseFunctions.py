@@ -63,14 +63,15 @@ def refreshDatabase(onlineUsers):
 		try:
 			sql_update_user = 'UPDATE userRegister SET ip==:ip, location==:location, last_login==:lastLogin, port==:port WHERE upi==:username'
 			c.execute(sql_update_user, {"ip":dic[items]['ip'], "location":dic[items]['location'], "lastLogin":dic[items]['lastLogin'], "username":dic[items]['username'], "port":dic[items]['port']})
+			conn.commit()
 			try:
 				sql_update_pubkey = 'UPDATE userRegister SET public_key==:publickey WHERE upi==:username'
-				c.execute(sql_update_user, {"username":dic[items]['username'], "publickey":dic[items]['pubkey']})
+				c.execute(sql_update_pubkey, {"publickey":dic[items]['publicKey'], "username":dic[items]['username']})
+				conn.commit()
 			except Error as e:
 				print e
 		except KeyError as e:
 			print e
-		conn.commit()
 	conn.close()
 	return dic
 
@@ -79,7 +80,7 @@ def pingRefresh(sender):
 	c = conn.cursor()
 	epochtime = float(time.time())
 	try:
-		sql_update_user = 'UPDATE userRegister SET time_stamp==:time WHERE upi==:username'
+		sql_update_user = 'UPDATE userRegister SET last_login==:time WHERE upi==:username'
 		c.execute(sql_update_user, {"time":epochtime, "username":sender})
 	except KeyError as e:
 		print e

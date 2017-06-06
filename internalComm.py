@@ -37,7 +37,7 @@ def profile(user):
 def saveFile(jsonDump):
 	try:
 		f = open("web/downloads/"+jsonDump['filename'], "w")
-		data = base64.base64decode(jsonDump['file'])
+		data = base64.decodestring(jsonDump['file'])
 		f.write(data)
 		f.close()
 		try:

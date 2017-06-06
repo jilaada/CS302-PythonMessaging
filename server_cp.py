@@ -80,7 +80,7 @@ class MainApp(object):
 			Page += '<input type="submit" value="Get Profile"/></form>'
 		except (KeyError, TypeError): #There is no username
 			# WHEN SOMEONE FIRST OPENS THE PAGE AFTER SERVER INITIALISATION GO TO LOG IN PAGE
-			Page += "Click here to <a href='login'>login</a>."
+			raise cherrypy.HTTPRedirect('/login')
 		# Upon trying to connect to the home page, the server will try to connect to a database
 		# if the database does not exist it will make it and close it
 		try:
@@ -112,16 +112,21 @@ class MainApp(object):
 	#The login page for the server
 	@cherrypy.expose
 	def login(self):
-		Page = '<form action="/signin" method="post" enctype="multipart/form-data">'
-		Page += 'Username: <input type="text" name="username"/><br/>'
-		Page += 'Password: <input type="password" name="password"/><br/>'
-		Page += 'Location: '
-		Page += '<select name="location" id="customDropdown">'
-		Page += '<option value=0>Uni Remote Linux</option><br/>'
-		Page += '<option value=1>Uni Wi-Fi</option><br/>'
-		Page += '<option value=2>External IP</option><br/>'
-		Page += '</select><br/>'
-		Page += '<input type="submit" value="Login"/></form>'
+		try:
+			f = open("public/index.html", "r")
+			Page = f.read()
+			f.close()
+		except Error as e:
+			Page = '<form action="/signin" method="post" enctype="multipart/form-data">'
+			Page += 'Username: <input type="text" name="username"/><br/>'
+			Page += 'Password: <input type="password" name="password"/><br/>'
+			Page += 'Location: '
+			Page += '<select name="location" id="customDropdown">'
+			Page += '<option value=0>Uni Remote Linux</option><br/>'
+			Page += '<option value=1>Uni Wi-Fi</option><br/>'
+			Page += '<option value=2>External IP</option><br/>'
+			Page += '</select><br/>'
+			Page += '<input type="submit" value="Login"/></form>'
 		return Page
 
 
@@ -184,7 +189,6 @@ class MainApp(object):
 	def receiveFile(self):
 		inputFile = cherrypy.request.json
 		internalComm.saveFile(inputFile)
-		print inputFile
 		return "0"
 
 
@@ -393,4 +397,15 @@ def runMainApp():
 
 #Run the function to start everything
 if __name__ == '__main__':
-	runMainApp()
+	conf = {
+		'/': {
+			'tools.sessions.on': True,
+			'tools.staticdir.root': os.path.abspath(os.getcwd())
+		},
+		'/static': {
+			'tools.staticdir.on': True,
+			'tools.staticdir.dir': './public'
+		}
+	}
+	
+	cherrypy.quickstart(runMainApp(), '/', conf)
