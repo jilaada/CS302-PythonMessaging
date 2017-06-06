@@ -1,5 +1,5 @@
 <!--
-COMPSYS 302 WEBSITE - ABOUT
+COMPSYS 302 WEBSITE - HOME
 AUTHOR: JILADA ECCLESTON
  -->
 
@@ -11,7 +11,7 @@ AUTHOR: JILADA ECCLESTON
     <meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta http-equiv="refresh" content="30">
     <title>Talkie</title>
-    <link rel="stylesheet" href="static/css/main.css">
+    <link rel="stylesheet" href="public/static/css/main.css" type="text/css">
 </head>
 
 <body>
@@ -22,30 +22,9 @@ AUTHOR: JILADA ECCLESTON
 			</ul>
 		</div>
         <div class="dash">
-            <ul class="side-nav">
-				<li style="width:100%"><a class="active" href="/">Home</a></li>
-				<li style="width:100%"><a class="side" href="index.html">Messages</a></li>
-				<li style="width:100%"><a class="side" href="index.html">Edit Profile</a></li>
-				<li style="width:100%"><a class="side" href="index.html">Settings</a></li>
-			</ul>
+            {:navActive}
         </div>
-        <div class="profile">
-			<h2>
-				Jilada Eccleston
-			</h2>
-			<div class="imgcontainer">
-				<img src="downloads/doggo.jpg" alt="Avatar" class="avatar">
-			</div>
-			<h3>
-				Position:
-			</h3>
-			<h3>
-				Location:
-			</h3>
-			<h3>
-				Description:
-			</h3>
-        </div>
+		{:profile}
 	</div>
 </body>
 </html>

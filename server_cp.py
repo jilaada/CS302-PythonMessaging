@@ -25,6 +25,7 @@ import base64
 import databaseFunctions
 import externalComm
 import internalComm
+import webHelper
 from sqlite3 import Error
 
 # Getting directory
@@ -59,19 +60,16 @@ class MainApp(object):
 	# The main web page for the website. The user is directed here when they first open the browser
 	@cherrypy.expose
 	def index(self):
-		Page = "Welcome! This is a test website for COMPSYS302!<br/>"
 		try:
+			Page = webHelper.createHomePage(cherrypy.session['username'])
+		except Error:
 			users = databaseFunctions.dropdownGet()
-			Page += "Hello " + cherrypy.session['username'] + "!<br/>"
-			Page += "Here is some bonus text because you've logged in!"
 			Page += '<form action="/usersOnline" method="post" enctype="multipart/form-data">'
 			Page += '<input type="submit" value="Get Users"/></form>'
 			Page += '<form action="/messageWrite" method="post" enctype="multipart/form-data">'
 			Page += '<input type="submit" value="Send a Message"/></form>'
 			Page += '<form action="/openFile" method="post" enctype="multipart/form-data">'
 			Page += '<input type="submit" value="Send a File"/></form>'
-			Page += '<form action="/myProfile" method="post" enctype="multipart/form-data">'
-			Page += '<input type="submit" value="My Profile"/></form>'
 			Page += '<form action="/userProfile" method="post" enctype="multipart/form-data">'
 			Page += 'User: '
 			Page += '<select name="user" id="customDropdown">'
@@ -95,7 +93,8 @@ class MainApp(object):
 		# This section determines if there is a database
 		if cherrypy.session['database'] is not None:
 			databaseFunctions.createTable()
-			databaseFunctions.addRegisteredUsers()
+			users = externalComm.getAllUsers()
+			databaseFunctions.addRegisteredUsers(users)
 
 		return Page
 
@@ -159,17 +158,20 @@ class MainApp(object):
 
 	@cherrypy.expose
 	def messageWrite(self):
-		users = databaseFunctions.dropdownGet()
-		Page = '<form action="/sendMessage" method="post" enctype="multipart/form-data">'
-		Page += 'Receiver: '
-		Page += '<div>'
-		Page += '<select name="destination" id="customDropdown">'
-		for i in users:
-			Page += '<option value=' + i + '>' + i + '</option>'
-		Page += '</select>'
-		Page += '</div>'
-		Page += 'Message: <input type="text" name="message"/>'
-		Page += '<input type="submit" value="Send"/></form>'
+		try:
+			Page = webHelper.createMessages(cherrypy.session['username'])
+		except KeyError as e:
+			users = databaseFunctions.dropdownGet()
+			Page = '<form action="/sendMessage" method="post" enctype="multipart/form-data">'
+			Page += 'Receiver: '
+			Page += '<div>'
+			Page += '<select name="destination" id="customDropdown">'
+			for i in users:
+				Page += '<option value=' + i + '>' + i + '</option>'
+			Page += '</select>'
+			Page += '</div>'
+			Page += 'Message: <input type="text" name="message"/>'
+			Page += '<input type="submit" value="Send"/></form>'
 		return Page
 
 
@@ -240,32 +242,12 @@ class MainApp(object):
 
 
 	@cherrypy.expose()
-	def myProfile(self):
-		# Fetch values from database
-		profileData = databaseFunctions.getProfile(cherrypy.session['username'])
-		Page = 'This page will display data about the user</br></br>'
-		Page += 'Name : ' + profileData['fullname'] + '</br>'
-		Page += 'Profile Picture : </br>'
-		Page += '<img src="' + profileData['picture'] + '" alt="Doggo"></br>'
-		Page += 'Location : ' + profileData['location'] + '</br>'
-		Page += 'Position : ' + profileData['position'] + '</br>'
-		Page += 'Description : ' + profileData['description'] + '</br>'
-		Page += '<form action="/editProfile" method="post" enctype="multipart/form-data">'
-		Page += '<input type="submit" value="Edit Profile"/></form>'
-		return Page
-
-
-	@cherrypy.expose()
 	def editProfile(self):
-		profileData = databaseFunctions.getProfile(cherrypy.session['username'])
-		Page = 'This page will display data about the user</br></br>'
-		Page += '<form action="/saveProfile" method="post" enctype="multipart/form-data">'
-		Page += 'Name: <input type="text" name="fullname" value="' + profileData['fullname'] + '"/><br/>'
-		Page += 'Location: <input type="text" name="location" value="' + profileData['location'] + '"/><br/>'
-		Page += 'Position: <input type="text" name="position" value="' + profileData['position'] + '"/><br/>'
-		Page += 'Description: <input type="text" name="description" value="' + profileData['description'] + '"/><br/>'
-		Page += 'Picture: <input type="text" name="picture" value="' + profileData['picture'] + '"/><br/>'
-		Page += '<input type="submit" value="Save Profile"/></form>'
+		try:
+			Page = webHelper.createEditProfile(cherrypy.session['username'])
+		except KeyError as e:
+			print "Error - no session"
+			raise cherrypy.HTTPRedirect('/')
 		return Page
 
 
@@ -312,7 +294,7 @@ class MainApp(object):
 			databaseFunctions.storeProfile(json_dump, cherrypy.session['username'])
 		except Error as e:
 			print e
-		raise cherrypy.HTTPRedirect('/myProfile')
+		raise cherrypy.HTTPRedirect('/')
 
 	# =================
 	# Other functions
@@ -404,4 +386,4 @@ if __name__ == '__main__':
 		}
 	}
 	
-	cherrypy.quickstart(runMainApp(), '/', conf)
+	runMainApp()

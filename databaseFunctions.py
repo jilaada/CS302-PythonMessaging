@@ -36,9 +36,7 @@ def createTable():
 	pass
 
 # Function that will take a connected database and add the registered users to the list
-def addRegisteredUsers():
-	dest = "http://cs302.pythonanywhere.com/listUsers"
-	userList = urllib.urlopen(dest)
+def addRegisteredUsers(userList):
 	list = tuple(userList.read().split(","))
 	for user in list:
 		addUser(user)
@@ -61,17 +59,18 @@ def refreshDatabase(onlineUsers):
 	c = conn.cursor()
 	for items in dic:
 		try:
-			sql_update_user = 'UPDATE userRegister SET ip==:ip, location==:location, last_login==:lastLogin, port==:port WHERE upi==:username'
-			c.execute(sql_update_user, {"ip":dic[items]['ip'], "location":dic[items]['location'], "lastLogin":dic[items]['lastLogin'], "username":dic[items]['username'], "port":dic[items]['port']})
+			sql_update_pubkey = 'UPDATE userRegister SET public_key==:publickey WHERE upi==:username'
+			c.execute(sql_update_pubkey, {"publickey": dic[items]['publicKey'], "username": dic[items]['username']})
 			conn.commit()
+		except KeyError:
 			try:
-				sql_update_pubkey = 'UPDATE userRegister SET public_key==:publickey WHERE upi==:username'
-				c.execute(sql_update_pubkey, {"publickey":dic[items]['publicKey'], "username":dic[items]['username']})
+				sql_update_user = 'UPDATE userRegister SET ip==:ip, location==:location, last_login==:lastLogin, port==:port WHERE upi==:username'
+				c.execute(sql_update_user, {"ip": dic[items]['ip'], "location": dic[items]['location'],
+				                            "lastLogin": dic[items]['lastLogin'], "username": dic[items]['username'],
+				                            "port": dic[items]['port']})
 				conn.commit()
-			except Error as e:
+			except (KeyError, TypeError) as e:
 				print e
-		except KeyError as e:
-			print e
 	conn.close()
 	return dic
 

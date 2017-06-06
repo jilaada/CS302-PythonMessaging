@@ -80,6 +80,16 @@ def autoGetList(user, pw):
 	return data
 
 
+# Function that will get the complete list of users
+def getAllUsers():
+	try:
+		dest = "http://cs302.pythonanywhere.com/listUsers"
+		userList = urllib.urlopen(dest)
+	except Error as e:
+		print e
+	return userList
+
+
 # Get the users who are online
 def usersOnline(user, pw):
 	users = autoGetList(user, pw).read()
