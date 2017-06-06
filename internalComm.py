@@ -24,11 +24,14 @@ def profile(user):
 	data = databaseFunctions.getIP(user)
 	try:
 		sent = externalComm.reqProfile(sendData, data["ip"], data["port"])
-		try:
-			# Store values in the database
-			databaseFunctions.storeProfile(sent.read(), user)
-		except Error as e:
-			print e
+		if sent != 0:
+			try:
+				# Store values in the database
+				databaseFunctions.storeProfile(sent.read(), user)
+			except Error as e:
+				print e
+		else:
+			return 1
 	except KeyError as e:
 		print e
 	return 0
@@ -36,7 +39,7 @@ def profile(user):
 # Function that will get the file and save it in directory
 def saveFile(jsonDump):
 	try:
-		f = open("web/downloads/"+jsonDump['filename'], "w")
+		f = open("public/downloads/"+jsonDump['filename'], "w")
 		data = base64.decodestring(jsonDump['file'])
 		f.write(data)
 		f.close()

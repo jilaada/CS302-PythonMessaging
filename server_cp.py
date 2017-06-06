@@ -42,7 +42,8 @@ class MainApp(object):
 	# CherryPy Configuration - uses a CherryPy config dictionary
 	_cp_config = {'tools.encode.on': True,
 				  'tools.encode.encoding': 'utf-8',
-				  'tools.sessions.on': 'True',
+				  'tools.sessions.on': True,
+				  'tools.staticdir.on': True,
 				  'tools.staticdir.dir': os.path.abspath(os.getcwd()),
 				 }
 
@@ -112,21 +113,9 @@ class MainApp(object):
 	#The login page for the server
 	@cherrypy.expose
 	def login(self):
-		try:
-			f = open("public/index.html", "r")
-			Page = f.read()
-			f.close()
-		except Error as e:
-			Page = '<form action="/signin" method="post" enctype="multipart/form-data">'
-			Page += 'Username: <input type="text" name="username"/><br/>'
-			Page += 'Password: <input type="password" name="password"/><br/>'
-			Page += 'Location: '
-			Page += '<select name="location" id="customDropdown">'
-			Page += '<option value=0>Uni Remote Linux</option><br/>'
-			Page += '<option value=1>Uni Wi-Fi</option><br/>'
-			Page += '<option value=2>External IP</option><br/>'
-			Page += '</select><br/>'
-			Page += '<input type="submit" value="Login"/></form>'
+		f = open("public/index.html")
+		Page = f.read()
+		f.close()
 		return Page
 
 
@@ -209,7 +198,7 @@ class MainApp(object):
 		return Page
 
 
-	# leave this until Hamish
+
 	@cherrypy.expose
 	def sendFile(self, destination=None, dataFile=None):
 		sender = cherrypy.session['username']
@@ -224,6 +213,10 @@ class MainApp(object):
 			try:
 				ipdata = databaseFunctions.getIP(destination)
 				send = externalComm.sendFile(out_json, ipdata["ip"], ipdata["port"])
+				if sent == 0:
+					print "--- File Sent Successfully ---"
+				else:
+					print "--- File Sent Unsuccessful ---"
 			except Error as e:
 				print e
 		except Error as e:
@@ -291,7 +284,10 @@ class MainApp(object):
 			else:
 				try:
 					sent = externalComm.send(sendData, data["ip"], data["port"])
-					print sent
+					if sent == 0:
+						print "--- Message Sent Unsuccessful ---"
+					else:
+						print "--- Message Sent Successfully ---"
 				except KeyError:
 					raise cherrypy.HTTPRedirect('/')
 		except (KeyError, TypeError) as e:

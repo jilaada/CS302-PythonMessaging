@@ -38,7 +38,9 @@ def externReport(curUser, curPw, curLocation):
 			print "Something went wrong here"
 		print "REPORTING"
 		time.sleep(25)
+	print "----------------------------"
 	print "THREAD ENDING --- SIGNED OUT"
+	print "----------------------------"
 
 
 # Toggle whether or not the function thread should report the credentials
@@ -92,9 +94,9 @@ def send(jsonDump, ip, port):
 		response = urllib2.urlopen(req, timeout=10)
 	except urllib2.HTTPError, e:
 		print e
+		response = 0
 	except urllib2.URLError, e:
-		print e
-	print response.read()
+		response = 0
 	return response
 
 
@@ -106,9 +108,10 @@ def sendFile(jsonDump, ip, port):
 		response = urllib2.urlopen(req, timeout=10)
 	except urllib2.HTTPError, e:
 		print e
+		response = 0
 	except urllib2.URLError, e:
 		print e
-	print response.read()
+		response = 0
 	return response
 
 
@@ -118,11 +121,11 @@ def reqProfile(jsonDump, ip, port):
 	try:
 		req = urllib2.Request(dest, jsonDump, {'Content-Type':'application/json'})
 		response = urllib2.urlopen(req, timeout=10)
-		print response
+		return response
 	except urllib2.HTTPError, e:
 		print e
 	except urllib2.URLError, e:
 		print e
 	except Error as e:
 		print e
-	return response
+	return 0

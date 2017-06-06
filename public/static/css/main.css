@@ -5,14 +5,20 @@ html, body {
     font: 300 16px/25px "Myriad Set Pro", sans-serif;
 }
 
+.container {
+	height: 100%;
+	background-color: white;
+}
+
 .title-block {
     margin-top: 0;
     padding: 0;
+    height: auto;
 }
 
 .top-nav {
     list-style-type: none;
-    margin-top: 0;
+    margin: 0;
     padding: 0;
     overflow: hidden;
     background-color: #333;
@@ -43,9 +49,7 @@ form {
     border: 3px solid #f1f1f1;
     padding: 10px;
     margin: 0;
-    align-content: center;
     width: 20%;
-    /*font: 300 16px/25px "Myriad Set Pro", sans-serif;*/
 }
 
 input[type=text], input[type=password] {
@@ -83,13 +87,14 @@ label {
     font: 300 24px/33px "Myriad Set Pro", sans-serif;
 }
 
-#dash {
+.dash {
     margin-right: 80%;
     margin-top: 53px;
     padding: 0;
+    height: auto;
 }
 
-#side-nav {
+.side-nav {
     list-style-type: none;
     margin: 0;
     padding: 0;
@@ -108,4 +113,23 @@ label {
 .select {
 	width: 100%;
 	margin: 8px 0;
+}
+
+.profile {
+	margin: 53px 10% 0px 30%;
+	padding: 15px;
+	height: 100%;
+}
+
+/* Center the avatar image inside this container */
+.imgcontainer {
+    text-align: center;
+    margin: 24px 0 12px 0;
+}
+
+/* Avatar image */
+img.avatar {
+    width: 450px;
+    height: 450px;
+    border-radius: 50%;
 }

@@ -177,11 +177,7 @@ def storeProfile(profileData, upi):
 		conn.close()
 	except Error as e:
 		try:
-			sql_update_profile = 'UPDATE userProfile SET fullname = :fullname, ' \
-			                     'position = :pos, ' \
-			                     'description = :desc, ' \
-			                     'location = :loc, ' \
-			                     'picture = :pic WHERE upi==:upi'
+			sql_update_profile = 'UPDATE userProfile SET fullname = :fullname, position = :pos, description = :desc, location = :loc, picture = :pic WHERE upi==:upi'
 			c.execute(sql_update_profile, {"upi": upi, "fullname": profileData['fullname'], "pos": profileData['position'],
 		                               "desc": profileData['description'], "loc": profileData['location'],
 		                               "pic": profileData['picture']})
