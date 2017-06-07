@@ -28,6 +28,7 @@ import externalComm
 import internalComm
 from sqlite3 import Error
 
+
 #This function will be used to import designs in to the home page
 def createHomePage(user):
 	f = open("public/home.html")
@@ -60,11 +61,15 @@ def createHomePage(user):
 						Description: ''' + profileData['description'] + '''
 					</h3>
 					</div>'''
-
+    
+	script = "<script></script>"
 	Page = Page.replace('{:navActive}', replaceText)
+	Page = Page.replace('{:script}', script)
 	returnPage = Page.replace('{:profile}', replaceText1)
 	return returnPage
 
+
+# Edit main profile page
 def createEditProfile(user):
 	f = open("public/home.html")
 	Page = f.read()
@@ -87,11 +92,15 @@ def createEditProfile(user):
 		            Description:<br/> <textarea name="description">''' + profileData['description'] + '''</textarea><br/>
 		            <button type="submit">Save Profile</button></form>
 		            </div>'''
-
+    
+	script = "<script></script>"
 	Page = Page.replace('{:navActive}', replaceText)
+	Page = Page.replace('{:script}', script)
 	returnPage = Page.replace('{:profile}', replaceText1)
 	return returnPage
 
+
+# Create the messages page
 def createMessages(user):
 	f = open("public/home.html")
 	Page = f.read()
@@ -108,12 +117,25 @@ def createMessages(user):
 
 	try:
 		for user in list:
-			replaceText += '<li style="width:100%"><a class="side" href="/">' + user + '</a></li>'
+			replaceText += '<li style="width:100%"><a class="side" href="javascript:displayMessages(\'' + user + '\')">' + user + '</a></li>'
 	except Error as e:
 		print e
 
-	replaceText1 = '<div class="messages"></div>'
-
+	replaceText1 = '''<div class="name-bar">
+                    </div>
+                    <div class="messages">
+                    </div>
+                    <div class="create-message">
+                        <form class="form-box" action="/sendMessage" method="post" enctype="multipart/form-data">
+                            <textarea class="write-message" name="description"></textarea>
+                            <input class="send" type="file" name="dataFile"/>
+                            <button class="send" type="submit">Send</button>
+                        </form>
+                    </div>'''
+    
+	script = '''<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+				<script src="public/main.js"></script>'''
 	Page = Page.replace('{:navActive}', replaceText)
+	Page = Page.replace('{:script}', script)
 	returnPage = Page.replace('{:profile}', replaceText1)
 	return returnPage

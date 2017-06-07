@@ -137,6 +137,25 @@ def getIP(destUPI):
 		print "Error - Not able to print get name"
 		return 0
 
+
+# Get all the messages sent to and from a person
+def getMessages(user):
+	conn = connectDatabase()
+	conn.row_factory = sqlite3.Row
+	c = conn.cursor()
+	try:
+		sql_select_messages = 'SELECT senderUPI, time_stamp, message FROM messageData WHERE senderUPI==:user OR destinationUPI==:user'
+		c.execute(sql_select_messages, {"user":user})
+		messages = c.fetchall()
+		conn.close()
+		for items in messages:
+			print items['senderUPI']
+	except Error as e:
+		print e
+		conn.close()
+		messages = 0
+	return messages
+
 # Get a list of users who are online
 def dropdownGet():
 	# Getting comparison time
@@ -186,6 +205,7 @@ def storeProfile(profileData, upi):
 			print e
 			return 1
 	return 0
+
 
 def getProfile(user):
 	conn = connectDatabase()

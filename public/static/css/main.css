@@ -22,13 +22,13 @@ html, body {
     padding: 0;
     overflow: hidden;
     background-color: #333;
-    position: fixed;
-    top: 0;
     width: 100%;
+    height: 4.6%;
 }
 
 li a {
     display: block;
+    height: 6%;
     color: white;
     text-align: center;
     padding: 14px 16px;
@@ -90,7 +90,7 @@ label {
 
 .dash {
     margin-right: 80%;
-    margin-top: 53px;
+    margin-top: 0;
     padding: 0;
     height: auto;
     text-align: left;
@@ -155,23 +155,53 @@ textarea {
     font: 300 14px/23px "Myriad Set Pro", sans-serif;
 }
 
-.messages {
-    margin: 53px 0 0 20%;
-	padding: 0;
-	height: auto;
+.name-bar {
+    margin: 0 0 0 20%;
+	padding: 10px;
+    height: 3%;
     text-align: center;
-    background-color: lightblue;
+    float: center;
+    width: auto;
+    background-color: gray;
 }
 
-.write {
-    margin: 80% 0 0 0;
-    padding: 0;
-    height: 50px;
-    background-color: blue;
+.messages {
+    margin: 0 0 0 20%;
+	padding: 0;
+    height: 81.6%;
+    width: auto;
     overflow: auto;
+    background-color: white;
 }
 
-.edit {
-    margin: 0 0 50px 0;
+.create-message {
+    margin: 0 0 0 20%;
+    border: 1px solid #ccc
+    background-color: white;
+    height: 9%;
+    padding: 0;
+}
+
+.write-message {
+    width: 80%;
     padding: 15px;
+    margin: 0;
+    height: 100%;
+    display: block;
+    float: left;
+}
+
+.form-box {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+}
+
+.send {
+    width: 20%;
+    height: 50%;
+    padding: 0;
+    margin: 0;
 }

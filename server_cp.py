@@ -62,21 +62,6 @@ class MainApp(object):
 	def index(self):
 		try:
 			Page = webHelper.createHomePage(cherrypy.session['username'])
-		except Error:
-			users = databaseFunctions.dropdownGet()
-			Page += '<form action="/usersOnline" method="post" enctype="multipart/form-data">'
-			Page += '<input type="submit" value="Get Users"/></form>'
-			Page += '<form action="/messageWrite" method="post" enctype="multipart/form-data">'
-			Page += '<input type="submit" value="Send a Message"/></form>'
-			Page += '<form action="/openFile" method="post" enctype="multipart/form-data">'
-			Page += '<input type="submit" value="Send a File"/></form>'
-			Page += '<form action="/userProfile" method="post" enctype="multipart/form-data">'
-			Page += 'User: '
-			Page += '<select name="user" id="customDropdown">'
-			for i in users:
-				Page += '<option value=' + i + '>' + i + '</option>'
-			Page += '</select>'
-			Page += '<input type="submit" value="Get Profile"/></form>'
 		except (KeyError, TypeError): #There is no username
 			# WHEN SOMEONE FIRST OPENS THE PAGE AFTER SERVER INITIALISATION GO TO LOG IN PAGE
 			raise cherrypy.HTTPRedirect('/login')
@@ -161,17 +146,7 @@ class MainApp(object):
 		try:
 			Page = webHelper.createMessages(cherrypy.session['username'])
 		except KeyError as e:
-			users = databaseFunctions.dropdownGet()
-			Page = '<form action="/sendMessage" method="post" enctype="multipart/form-data">'
-			Page += 'Receiver: '
-			Page += '<div>'
-			Page += '<select name="destination" id="customDropdown">'
-			for i in users:
-				Page += '<option value=' + i + '>' + i + '</option>'
-			Page += '</select>'
-			Page += '</div>'
-			Page += 'Message: <input type="text" name="message"/>'
-			Page += '<input type="submit" value="Send"/></form>'
+			raise cherrypy.HTTPRedirect('/')
 		return Page
 
 
@@ -215,7 +190,7 @@ class MainApp(object):
 			try:
 				ipdata = databaseFunctions.getIP(destination)
 				send = externalComm.sendFile(out_json, ipdata["ip"], ipdata["port"])
-				if sent == 0:
+				if send == 0:
 					print "--- File Sent Successfully ---"
 				else:
 					print "--- File Sent Unsuccessful ---"
@@ -316,6 +291,12 @@ class MainApp(object):
 	@cherrypy.tools.json_in()
 	def handshake(self):
 		inputMessage = cherrypy.request.json
+		pass
+
+
+	@cherrypy.expose
+	def getMessages(self, user):
+		databaseFunctions.getMessages(user)
 		pass
 
 	# =================

@@ -27,13 +27,16 @@ AUTHOR: JILADA ECCLESTON
 				<li style="width:100%"><a class="side" href="/">Settings</a></li>
 			</ul>
         </div>
+        <div class="name-bar">
+        </div>
         <div class="messages">
-            <div class="edit">
-
-            </div>
-            <div class="write">
-
-            </div>
+        </div>
+        <div class="create-message">
+            <form class="form-box" action="/sendMessage" method="post" enctype="multipart/form-data">
+                <textarea class="write-message" name="description"></textarea>
+                <input class="send" type="file" name="dataFile"/>
+                <button class="send" type="submit">Send</button>
+            </form>
         </div>
 	</div>
 </body>
