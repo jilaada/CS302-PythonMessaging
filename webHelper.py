@@ -126,14 +126,15 @@ def createMessages(user):
                     <div class="messages">
                     </div>
                     <div class="create-message">
-                        <form class="form-box" action="/sendMessage" method="post" enctype="multipart/form-data">
+                        <form class="form-box" action="javascript:sendMessage()" method="post" enctype="multipart/form-data">
                             <textarea class="write-message" name="description"></textarea>
-                            <input class="send" type="file" name="dataFile"/>
+                            <input class="send" id="file" type="file" name="dataFile"/>
                             <button class="send" type="submit">Send</button>
                         </form>
                     </div>'''
     
 	script = '''<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+				<script src="http://malsup.github.com/jquery.form.js"></script>
 				<script src="public/main.js"></script>'''
 	Page = Page.replace('{:navActive}', replaceText)
 	Page = Page.replace('{:script}', script)
