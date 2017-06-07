@@ -167,18 +167,20 @@ textarea {
 
 .messages {
     margin: 0 0 0 20%;
-	padding: 0;
+	padding: 0 1%;
     height: 81.6%;
     width: auto;
     overflow: auto;
     background-color: white;
+    display: flex;
+    flex-direction: column;
 }
 
 .create-message {
     margin: 0 0 0 20%;
-    border: 1px solid #ccc
+    border: 1px solid #ccc;
     background-color: white;
-    height: 9%;
+    height: 8.8%;
     padding: 0;
 }
 
@@ -204,4 +206,31 @@ textarea {
     height: 50%;
     padding: 0;
     margin: 0;
+}
+
+.message-box-user {
+	max-width: 40%;
+	height: auto;
+	padding: 10px;
+	margin: 1% 0;
+	background-color: lightgray;
+	font: 300 14px/23px "Myriad Set Pro", sans-serif;
+	display: inline-block;
+	align-self: left;
+	margin-left: auto;
+	white-space: pre-line;
+	word-wrap: break-word;
+}
+
+.message-box-dest {
+	max-width: 40%;
+	height: auto;
+	padding: 10px;
+	margin: 1% 0;
+	background-color: lightblue;
+	font: 300 14px/23px "Myriad Set Pro", sans-serif;
+	display: inline-block;
+	align-self: left;
+	white-space: pre-line;
+	word-wrap: break-word;
 }

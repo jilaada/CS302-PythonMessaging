@@ -146,15 +146,13 @@ def getMessages(user):
 	try:
 		sql_select_messages = 'SELECT senderUPI, time_stamp, message FROM messageData WHERE senderUPI==:user OR destinationUPI==:user'
 		c.execute(sql_select_messages, {"user":user})
-		messages = c.fetchall()
+		messagesReturn = c.fetchall()
 		conn.close()
-		for items in messages:
-			print items['senderUPI']
 	except Error as e:
 		print e
 		conn.close()
-		messages = 0
-	return messages
+		messagesReturn = 0
+	return messagesReturn
 
 # Get a list of users who are online
 def dropdownGet():

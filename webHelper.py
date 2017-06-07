@@ -139,3 +139,25 @@ def createMessages(user):
 	Page = Page.replace('{:script}', script)
 	returnPage = Page.replace('{:profile}', replaceText1)
 	return returnPage
+
+
+# Creste teh divs to show the messages
+def createViewMessage(messages, currentUser):
+	print messages
+	div = ""
+	# Need to get the messages and create the divs
+	try:
+		for items in messages:
+			try:
+				if items['senderUPI'] == currentUser:
+					# Div for my messages displayed
+					div += '<div class="message-box-user" name=' + items['time_stamp'] + '>' + items['senderUPI'] + ': ' + items['message'] + '</div>'
+				else:
+					# Div for guest messages
+					div += '<div class="message-box-dest" name=' + items['time_stamp'] + '>' + items['senderUPI'] + ': ' + items['message'] + '</div>'
+			except Error as e:
+				print e
+		return div
+	except Error as e:
+		print e
+	return 0

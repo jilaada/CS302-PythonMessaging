@@ -296,8 +296,9 @@ class MainApp(object):
 
 	@cherrypy.expose
 	def getMessages(self, user):
-		databaseFunctions.getMessages(user)
-		pass
+		messages = databaseFunctions.getMessages(user)
+		html = webHelper.createViewMessage(messages, cherrypy.session['username'])
+		return html
 
 	# =================
 	# Private functions
