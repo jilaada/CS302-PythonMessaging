@@ -61,8 +61,12 @@ def autoReport(username, password, curLocation):
 		# Get external IP
 		data = json.loads(urllib.urlopen("http://ip.jsontest.com/").read())
 		dataip = data['ip']
-	data = urllib2.urlopen('http://cs302.pythonanywhere.com/report?username=' + username + '&password=' + password + '&location=' + curLocation + '&ip=' + dataip + '&port=10001', timeout=10)
-	error = data.read()
+
+	try:
+		data = urllib2.urlopen('http://cs302.pythonanywhere.com/report?username=' + username + '&password=' + password + '&location=' + curLocation + '&ip=' + dataip + '&port=10001', timeout=10)
+		error = data.read()
+	except Error as e:
+		print "Error - " + str(e)
 	if error[0] is "0":
 		return 0
 	else:
@@ -76,7 +80,11 @@ def autoGetList(user, pw):
 	if user is None:
 		data = "You are not signed in"
 	else:
-		data = urllib2.urlopen('http://cs302.pythonanywhere.com/getList?username=' + user + '&password=' + pw + '&enc=0&json=1', timeout=10)
+		try:
+			data = urllib2.urlopen('http://cs302.pythonanywhere.com/getList?username=' + user + '&password=' + pw + '&enc=0&json=1', timeout=10)
+		except Error as e:
+			print "Error - " + str(e)
+			data = 1
 	return data
 
 

@@ -101,14 +101,14 @@ def createEditProfile(user):
 
 
 # Create the messages page
-def createMessages(user):
+def createMessages(user, pw):
 	f = open("public/home.html")
 	Page = f.read()
 	f.close()
 	# Get the full list of users
 	try:
-		userList = externalComm.getAllUsers()
-		list = tuple(userList.read().split(","))
+		userList = externalComm.autoGetList(user, pw).read()
+		dic = json.loads(userList)
 	except Error as e:
 		print e
 
@@ -116,8 +116,8 @@ def createMessages(user):
 	              '<li style="width:100% float:center"><a class="active" href="/">Home</a></li>'
 
 	try:
-		for user in list:
-			replaceText += '<li style="width:100%"><a class="side" href="javascript:displayMessages(\'' + user + '\')">' + user + '</a></li>'
+		for items in dic:
+			replaceText += '<li style="width:100%"><a class="side" href="javascript:displayMessages(\'' + dic[items]['username'] + '\')">' + dic[items]['username'] + '</a></li>'
 	except Error as e:
 		print e
 
@@ -126,10 +126,10 @@ def createMessages(user):
                     <div class="messages">
                     </div>
                     <div class="create-message">
-                        <form class="form-box" action="javascript:sendMessage()" method="post" enctype="multipart/form-data">
-                            <textarea class="write-message" name="description"></textarea>
+                        <form class="form-box" action="/sendMessage" method="post" enctype="multipart/form-data">
+                            <textarea class="write-message" name="message"></textarea>
                             <input class="send" id="file" type="file" name="dataFile"/>
-                            <button class="send" type="submit">Send</button>
+                            <button class="send" on-click="sendMessage()" type="submit">Send</button>
                         </form>
                     </div>'''
     

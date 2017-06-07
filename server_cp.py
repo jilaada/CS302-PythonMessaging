@@ -31,6 +31,7 @@ from sqlite3 import Error
 # Getting directory
 localDir = os.path.dirname(__file__)
 absDir = os.path.join(os.getcwd(), localDir)
+activeUser = ""
 
 # The address we listen for connections on
 listen_ip = "0.0.0.0"
@@ -144,7 +145,7 @@ class MainApp(object):
 	@cherrypy.expose
 	def messageWrite(self):
 		try:
-			Page = webHelper.createMessages(cherrypy.session['username'])
+			Page = webHelper.createMessages(cherrypy.session['username'], cherrypy.session['password'])
 		except KeyError as e:
 			raise cherrypy.HTTPRedirect('/')
 		return Page
@@ -227,7 +228,8 @@ class MainApp(object):
 
 
 	@cherrypy.expose
-	def sendMessage(self, destination=None, message=None):
+	def sendMessage(self, message=None, dataFile=None):
+		destination = activeUser
 		epoch_time = float(time.time())
 		output_dict = {"sender":"jecc724", "destination":destination, "message":message, "stamp":epoch_time, "encoding":2}
 		ins = databaseFunctions.insertMessage(output_dict)
@@ -287,18 +289,31 @@ class MainApp(object):
 		return 0
 
 
-	@cherrypy.expose
+	@cherrypy.expose()
 	@cherrypy.tools.json_in()
 	def handshake(self):
 		inputMessage = cherrypy.request.json
 		pass
 
 
-	@cherrypy.expose
+	@cherrypy.expose()
 	def getMessages(self, user):
 		messages = databaseFunctions.getMessages(user)
 		html = webHelper.createViewMessage(messages, cherrypy.session['username'])
 		return html
+
+
+	@cherrypy.expose()
+	def toggleActiveUser(self, user):
+		global activeUser
+		activeUser = user
+
+
+	@cherrypy.expose()
+	def getActiveUser(self):
+		global activeUser
+		return activeUser
+
 
 	# =================
 	# Private functions
@@ -315,7 +330,6 @@ class MainApp(object):
 		if error == 0:
 			cherrypy.session['password'] = hashpw
 			cherrypy.session['username'] = username
-			print cherrypy.session['username']
 			cherrypy.session['location'] = location
 			t = threading.Thread(target=externalComm.externReport, args=(cherrypy.session['username'], cherrypy.session['password'], cherrypy.session['location']))
 			t.daemon = True
