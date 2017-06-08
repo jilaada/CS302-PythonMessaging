@@ -124,6 +124,7 @@ def sendFile(jsonDump, ip, port):
 	try:
 		req = urllib2.Request(dest, jsonDump, {'Content-Type':'application/json'})
 		response = urllib2.urlopen(req, timeout=10)
+		print response.read()
 	except urllib2.HTTPError, e:
 		print e
 		response = 0

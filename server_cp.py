@@ -137,10 +137,10 @@ class MainApp(object):
 	@cherrypy.tools.json_in()
 	def receiveMessage(self):
 		inputMessage = cherrypy.request.json
+		print messageData
 		currentUser = self.getSessionUser()
-		if inputFile['destination'] == currentUser: 
-			databaseFunctions.insertMessage(inputMessage)
-			print inputMessage
+		databaseFunctions.insertMessage(inputMessage)
+		print inputMessage
 		return "0"
 
 
@@ -200,7 +200,7 @@ class MainApp(object):
 				ipdata = databaseFunctions.getIP(destination)
 				send = externalComm.sendFile(out_json, ipdata["ip"], ipdata["port"])
 				databaseFunctions.storeFile(output_dict)
-				if send == 0:
+				if send == "0":
 					print "--- File Sent Successfully ---"
 				else:
 					print "--- File Sent Unsuccessful ---"
@@ -304,8 +304,15 @@ class MainApp(object):
 
 	@cherrypy.expose()
 	def getMessages(self, user):
-		messages = databaseFunctions.getMessages(user)
+		messages = databaseFunctions.getMessages(user, cherrypy.session['username'])
 		html = webHelper.createViewMessage(messages, cherrypy.session['username'])
+		return html
+
+
+	@cherrypy.expose()
+	def refreshUserList(self):
+		html = webHelper.createUserList(cherrypy.session['username'], cherrypy.session['password'])
+		print "Refreshing Users"
 		return html
 
 
@@ -351,8 +358,8 @@ class MainApp(object):
 			return 1
 
 	# Get the current session user
-	def getSessionUser():
-		return cherrypy.session['username']
+	def getSessionUser(self):
+		return "jecc724"
 
 
 def runMainApp():

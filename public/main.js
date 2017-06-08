@@ -51,6 +51,17 @@ $('input[type=file]').change(function(){
 	});
 
 
+function refreshUsers() {
+	var message_request;
+	message_request = "/refreshUserList";
+	$.get(message_request, function(response) {
+		$('.dash').html(response);
+	});
+	setTimeout(function() {
+		refreshUsers()
+	}, 25000);
+}
+
 
 function sendMessage() {
 	var message_request;
@@ -71,11 +82,8 @@ function refreshMessages(user) {
 	});
 }
 
-// Need a function to refresh the user list
-function refreshUsers() {
-
-}
 
 $(document).ready(function() {
 	// Starting
+	refreshUsers()
 });

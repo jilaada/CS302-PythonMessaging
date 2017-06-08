@@ -158,17 +158,19 @@ textarea {
 .name-bar {
     margin: 0 0 0 20%;
 	padding: 10px;
-    height: 3.8%;
+    height: 3.0%;
     text-align: center;
     float: center;
     width: auto;
     background-color: gray;
+    font: 300 22px/30px "Myriad Set Pro", sans-serif;
+    text-transform: uppercase;
 }
 
 .messages {
     margin: 0 0 0 20%;
 	padding: 0 1%;
-    height: 79%;
+    height: 81.4%;
     width: auto;
     overflow: auto;
     background-color: white;
@@ -204,7 +206,6 @@ textarea {
 
 .send {
     width: 20%;
-    height: 50%;
     padding: 0;
     margin: 0;
 }
@@ -234,4 +235,13 @@ textarea {
 	align-self: left;
 	white-space: pre-line;
 	word-wrap: break-word;
+}
+
+#send-button {
+	height: 50%;
+}
+
+
+#file {
+	height: auto;
 }

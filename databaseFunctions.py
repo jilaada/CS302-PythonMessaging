@@ -137,6 +137,7 @@ def storeFile(fileData):
 			try:
 				sql_insert_message = 'INSERT INTO messageData (senderUPI, time_stamp, message, destinationUPI, message_type) VALUES (:username, :time_stamp, :message, :destination, :type)'
 				c.execute(sql_insert_message, {"username":fileData['sender'], "time_stamp":fileData['stamp'], "message":fileData['filename'], "destination":fileData['destination'], "type":fileData['content_type']})
+				conn.commit()
 			except (KeyError, TypeError) as e:
 				print e
 				conn.close()
@@ -175,13 +176,13 @@ def getIP(destUPI):
 
 
 # Get all the messages sent to and from a person
-def getMessages(user):
+def getMessages(user, clientUser):
 	conn = connectDatabase()
 	conn.row_factory = sqlite3.Row
 	c = conn.cursor()
 	try:
-		sql_select_messages = 'SELECT senderUPI, time_stamp, message FROM messageData WHERE senderUPI==:user OR destinationUPI==:user'
-		c.execute(sql_select_messages, {"user":user})
+		sql_select_messages = 'SELECT senderUPI, time_stamp, message, message_type FROM messageData WHERE (senderUPI==:user AND destinationUPI==:client) OR (senderUPI==:client AND destinationUPI==:user)'
+		c.execute(sql_select_messages, {"user":user, "client":clientUser})
 		messagesReturn = c.fetchall()
 		conn.close()
 	except Error as e:

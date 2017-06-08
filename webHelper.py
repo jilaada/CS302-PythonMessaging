@@ -110,7 +110,11 @@ def createMessages(user, pw):
 	# Get the full list of users
 	try:
 		userList = externalComm.autoGetList(user, pw).read()
-		dic = json.loads(userList)
+		try:
+			dic = json.loads(userList)
+		except TypeError as e:
+			print e
+			dic = None
 	except Error as e:
 		print e
 
@@ -152,16 +156,59 @@ def createViewMessage(messages, currentUser):
 	# Need to get the messages and create the divs
 	try:
 		for items in messages:
+			print items['message_type']
+			try:
+				messagetype = str(items['message_type'])
+				messagetype = messagetype.split("/")
+			except TypeError as e:
+				messagetype = "unknownType"
 			try:
 				if items['senderUPI'] == currentUser:
 					# Div for my messages displayed
-					div += '<div class="message-box-user" name=' + items['time_stamp'] + '>' + items['senderUPI'] + ': ' + items['message'] + '</div>'
+					print messagetype[1]
+					if messagetype[0] == "text":
+						div += '<div class="message-box-user" name=' + items['time_stamp'] + '>' + items['senderUPI'] + ': ' + items['message'] + '</div>'
+					elif messagetype[0] == "video":
+						div += '<div class="message-box-user" name=' + items['time_stamp'] + '>' + items['senderUPI'] + ': <video width="auto" height="auto" controls><source src="public/downloads/' + items['message'] + '"></source></video></div>'
+					elif messagetype[0] == "image":
+						div += '<div class="message-box-user" name=' + items['time_stamp'] + '>' + items['senderUPI'] + ': <img src="public/downloads/' + items['message'] + '" style="width:auto;height:auto;"></img></div>'
+					elif messagetype[0] == "application":
+						div += '<div class="message-box-user" name=' + items['time_stamp'] + '>' + items['senderUPI'] + ': <a href="public/downloads/' + items['message'] + '" >' + items['message'] + '</a></div>'
+					else:
+						div += '<div class="message-box-user" name=' + items['time_stamp'] + '>' + items['senderUPI'] + ': ' + items['message'] + '</div>'
 				else:
 					# Div for guest messages
-					div += '<div class="message-box-dest" name=' + items['time_stamp'] + '>' + items['senderUPI'] + ': ' + items['message'] + '</div>'
+					if messagetype[0] == "text":
+						div += '<div class="message-box-dest" name=' + items['time_stamp'] + '>' + items['senderUPI'] + ': ' + items['message'] + '</div>'
+					elif messagetype[0] == "video":
+						div += '<div class="message-box-dest" name=' + items['time_stamp'] + '>' + items['senderUPI'] + ': <video width="auto" height="auto" controls><source src="public/downloads/' + items['message'] + '"></source></video></div>'
+					elif messagetype[0] == "image":
+						div += '<div class="message-box-dest" name=' + items['time_stamp'] + '>' + items['senderUPI'] + ': <img src="public/downloads/' + items['message'] + '" style="width:90%;height:90%;"></img></div>'
+					elif messagetype[0] == "application":
+						div += '<div class="message-box-dest" name=' + items['time_stamp'] + '>' + items['senderUPI'] + ': <a href="public/downloads/' + items['message'] + '" >' + items['message'] + '</a></div>'
+					else:
+						div += '<div class="message-box-dest" name=' + items['time_stamp'] + '>' + items['senderUPI'] + ': ' + items['message'] + '</div>'
 			except Error as e:
 				print e
 		return div
 	except Error as e:
 		print e
 	return 0
+
+
+def createUserList(user, pw):
+	try:
+		userList = externalComm.autoGetList(user, pw).read()
+		dic = json.loads(userList)
+	except Error as e:
+		print e
+	
+	replaceText = '<ul class="side-nav">' \
+	              '<li style="width:100% float:center"><a class="active" href="/">Home</a></li>'
+
+	try:
+		for items in dic:
+			replaceText += '<li style="width:100%"><a class="side" href="javascript:displayMessages(\'' + dic[items]['username'] + '\')">' + dic[items]['username'] + '</a></li>'
+	except Error as e:
+		print e
+	return replaceText
