@@ -166,24 +166,6 @@ class MainApp(object):
 
 
 	@cherrypy.expose
-	def openFile(self):
-		users = databaseFunctions.dropdownGet()
-		Page = '<form action="/sendFile" method="post" enctype="multipart/form-data">'
-		Page += 'Receiver: '
-		Page += '<div>'
-		Page += '<select name="destination" id="customDropdown">'
-		for i in users:
-			Page += '<option value=' + i + '>' + i + '</option>'
-		Page += '</select>'
-		Page += '</div>'
-		Page += 'Specify a file: </br>'
-		Page += '<input type="file" name="dataFile"/></br>'
-		Page += '<input type="submit" value="Send"/></form>'
-		return Page
-
-
-
-	@cherrypy.expose
 	def sendFile(self, dataFile=None):
 		global activeUser
 		sender = cherrypy.session['username']
