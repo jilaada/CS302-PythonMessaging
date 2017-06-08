@@ -18,8 +18,8 @@ import externalComm
 from sqlite3 import Error
 
 # Function that will get the profile of a specific user
-def profile(user):
-	user_dict = {"profile_username": user}
+def profile(user, sender):
+	user_dict = {"profile_username": user, "sender":sender}
 	sendData = json.dumps(user_dict)
 	data = databaseFunctions.getIP(user)
 	try:

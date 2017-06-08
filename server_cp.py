@@ -137,8 +137,10 @@ class MainApp(object):
 	@cherrypy.tools.json_in()
 	def receiveMessage(self):
 		inputMessage = cherrypy.request.json
-		databaseFunctions.insertMessage(inputMessage)
-		print inputMessage
+		currentUser = self.getSessionUser()
+		if inputFile['destination'] == currentUser: 
+			databaseFunctions.insertMessage(inputMessage)
+			print inputMessage
 		return "0"
 
 
@@ -155,7 +157,11 @@ class MainApp(object):
 	@cherrypy.tools.json_in()
 	def receiveFile(self):
 		inputFile = cherrypy.request.json
-		internalComm.saveFile(inputFile)
+		currentUser = self.getSessionUser()
+		# Leaving data out of my database that isn't meant for me
+		if inputFile['destination'] == currentUser:
+			internalComm.saveFile(inputFile)
+			databaseFunctions.storeFile(inputFile)
 		return "0"
 
 
@@ -178,8 +184,10 @@ class MainApp(object):
 
 
 	@cherrypy.expose
-	def sendFile(self, destination=None, dataFile=None):
+	def sendFile(self, dataFile=None):
+		global activeUser
 		sender = cherrypy.session['username']
+		destination = activeUser
 		epoch_time = float(time.time())
 		hashing = int(0)
 		size = 0
@@ -191,6 +199,7 @@ class MainApp(object):
 			try:
 				ipdata = databaseFunctions.getIP(destination)
 				send = externalComm.sendFile(out_json, ipdata["ip"], ipdata["port"])
+				databaseFunctions.storeFile(output_dict)
 				if send == 0:
 					print "--- File Sent Successfully ---"
 				else:
@@ -207,13 +216,10 @@ class MainApp(object):
 	def getProfile(self):
 		inputMessage = cherrypy.request.json
 		user = inputMessage["profile_username"]
-		if user == "jecc724":
-			profileData = databaseFunctions.getProfile(user)
-			encoding = int(2)
-			encryption = int(0)
-			output_dict = {"fullname":profileData['fullname'], "position":profileData['position'], "description":profileData['description'],
-			               "location":profileData['location'], "picture":profileData['picture'], "encoding":encoding, "encryption":encryption}
-			return json.dumps(output_dict)
+		profileData = databaseFunctions.getProfile(user)
+		encryption = int(0)
+		output_dict = {"fullname":profileData['fullname'], "position":profileData['position'], "description":profileData['description'], "location":profileData['location'], "picture":profileData['picture'], "encryption":encryption}
+		return json.dumps(output_dict)
 		pass
 
 
@@ -227,11 +233,11 @@ class MainApp(object):
 		return Page
 
 
-	@cherrypy.expose
-	def sendMessage(self, message=None, dataFile=None):
+	
+	def sendText(self, message):
 		destination = activeUser
 		epoch_time = float(time.time())
-		output_dict = {"sender":"jecc724", "destination":destination, "message":message, "stamp":epoch_time, "encoding":2}
+		output_dict = {"sender":cherrypy.session['username'], "destination":destination, "message":message, "stamp":epoch_time}
 		ins = databaseFunctions.insertMessage(output_dict)
 		if ins == 1:
 			print "Error - Message did not store properly"
@@ -251,13 +257,13 @@ class MainApp(object):
 					raise cherrypy.HTTPRedirect('/')
 		except (KeyError, TypeError) as e:
 			print e
-		raise cherrypy.HTTPRedirect('/messageWrite')
+		return "0"
 
 
 	@cherrypy.expose()
 	def userProfile(self, user=None):
 		try:
-			internalComm.profile(user)
+			internalComm.profile(user, cherrypy.session['username'])
 			raise cherrypy.HTTPRedirect('/')
 		except (KeyError, TypeError):
 			raise cherrypy.HTTPRedirect('/')
@@ -286,7 +292,7 @@ class MainApp(object):
 	@cherrypy.expose()
 	def ping(self, sender):
 		databaseFunctions.pingRefresh(sender)
-		return 0
+		return "0"
 
 
 	@cherrypy.expose()
@@ -310,10 +316,9 @@ class MainApp(object):
 
 
 	@cherrypy.expose()
-	def getActiveUser(self):
-		global activeUser
-		return activeUser
-
+	def sendMessage(self, message):
+		self.sendText(message)
+		return "0"
 
 	# =================
 	# Private functions
@@ -345,6 +350,9 @@ class MainApp(object):
 			cherrypy.session['location'] = None
 			return 1
 
+	# Get the current session user
+	def getSessionUser():
+		return cherrypy.session['username']
 
 
 def runMainApp():

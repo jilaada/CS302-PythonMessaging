@@ -141,9 +141,9 @@ def reqProfile(jsonDump, ip, port):
 		response = urllib2.urlopen(req, timeout=10)
 		return response
 	except urllib2.HTTPError, e:
-		print e
+		print str(e)
 	except urllib2.URLError, e:
-		print e
+		print str(e)
 	except Error as e:
-		print e
+		print str(e)
 	return 0

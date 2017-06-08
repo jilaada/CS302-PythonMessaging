@@ -63,6 +63,7 @@ def createHomePage(user):
 					</div>'''
     
 	script = "<script></script>"
+	Page = Page.replace('{:session}', user)
 	Page = Page.replace('{:navActive}', replaceText)
 	Page = Page.replace('{:script}', script)
 	returnPage = Page.replace('{:profile}', replaceText1)
@@ -94,6 +95,7 @@ def createEditProfile(user):
 		            </div>'''
     
 	script = "<script></script>"
+	Page = Page.replace('{:session}', user)
 	Page = Page.replace('{:navActive}', replaceText)
 	Page = Page.replace('{:script}', script)
 	returnPage = Page.replace('{:profile}', replaceText1)
@@ -126,16 +128,18 @@ def createMessages(user, pw):
                     <div class="messages">
                     </div>
                     <div class="create-message">
-                        <form class="form-box" action="/sendMessage" method="post" enctype="multipart/form-data">
-                            <textarea class="write-message" name="message"></textarea>
+                        <div class="form-box">
+                            <textarea class="write-message" id="clear" name="message"></textarea>
                             <input class="send" id="file" type="file" name="dataFile"/>
-                            <button class="send" on-click="sendMessage()" type="submit">Send</button>
-                        </form>
+                            <button class="send" id="send-button" type="submit">Send</button>
+                        </div>
                     </div>'''
     
 	script = '''<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 				<script src="http://malsup.github.com/jquery.form.js"></script>
+				<script type="text/javascript" src="public/simpleUpload.js"></script>
 				<script src="public/main.js"></script>'''
+	Page = Page.replace('{:session}', user)
 	Page = Page.replace('{:navActive}', replaceText)
 	Page = Page.replace('{:script}', script)
 	returnPage = Page.replace('{:profile}', replaceText1)
@@ -144,7 +148,6 @@ def createMessages(user, pw):
 
 # Creste teh divs to show the messages
 def createViewMessage(messages, currentUser):
-	print messages
 	div = ""
 	# Need to get the messages and create the divs
 	try:

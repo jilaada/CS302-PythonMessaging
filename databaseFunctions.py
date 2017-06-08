@@ -23,15 +23,18 @@ from sqlite3 import Error
 
 # Function that will take a connected database and add the table headers
 def createTable():
-	sql_create_table_usersRegisters = "CREATE TABLE IF NOT EXISTS userRegister (id INTEGER PRIMARY KEY AUTOINCREMENT, upi TEXT UNIQUE, ip TEXT, public_key TEXT, location INTEGER, last_login TEXT, port TEXT); "
-	sql_create_table_messageData = "CREATE TABLE IF NOT EXISTS messageData (id INTEGER PRIMARY KEY AUTOINCREMENT, senderUPI TEXT, destinationUPI TEXT, time_stamp TEXT, message TEXT); "
+	sql_create_table_usersRegisters = "CREATE TABLE IF NOT EXISTS userRegister (id INTEGER PRIMARY KEY AUTOINCREMENT, upi TEXT UNIQUE, ip TEXT, public_key TEXT, location INTEGER, last_login TEXT, port TEXT, status TEXT); "
+	sql_create_table_messageData = "CREATE TABLE IF NOT EXISTS messageData (id INTEGER PRIMARY KEY AUTOINCREMENT, senderUPI TEXT, destinationUPI TEXT, time_stamp TEXT, message TEXT, message_type TEXT); "
 	sql_create_table_profile = "CREATE TABLE IF NOT EXISTS userProfile (id INTEGER PRIMARY KEY AUTOINCREMENT, upi TEXT UNIQUE, fullname TEXT, position TEXT, description TEXT, location TEXT, picture TEXT); "
 	conn = connectDatabase()
 	c = conn.cursor()
-	c.execute(sql_create_table_usersRegisters)
-	c.execute(sql_create_table_messageData)
-	c.execute(sql_create_table_profile)
-	conn.commit()
+	try:
+		c.execute(sql_create_table_usersRegisters)
+		c.execute(sql_create_table_messageData)
+		c.execute(sql_create_table_profile)
+		conn.commit()
+	except Error as e:
+		print "Error in Database Execution - " + str(e)
 	conn.close()
 	pass
 
@@ -47,8 +50,11 @@ def addUser(user):
 	sql_insert_upi = 'INSERT OR IGNORE INTO userRegister(upi) VALUES(?) '
 	conn = connectDatabase()
 	c = conn.cursor()
-	c.execute(sql_insert_upi, (user,))
-	conn.commit()
+	try:
+		c.execute(sql_insert_upi, (user,))
+		conn.commit()
+	except Error as e:
+		print "Error in Database Execution - " + str(e)
 	conn.close()
 	pass
 
@@ -100,8 +106,8 @@ def insertMessage(messageData):
 		c.execute(sql_select_message, {"username":messageData['sender'], "time_stamp":messageData['stamp']})
 		if c.fetchone() is None:
 			try:
-				sql_insert_message = 'INSERT INTO messageData (senderUPI, time_stamp, message, destinationUPI) VALUES (:username, :time_stamp, :message, :destination)'
-				c.execute(sql_insert_message, {"username":messageData['sender'], "time_stamp":messageData['stamp'], "message":messageData['message'], "destination":messageData['destination']})
+				sql_insert_message = 'INSERT INTO messageData (senderUPI, time_stamp, message, destinationUPI, message_type) VALUES (:username, :time_stamp, :message, :destination, :type)'
+				c.execute(sql_insert_message, {"username":messageData['sender'], "time_stamp":messageData['stamp'], "message":messageData['message'], "destination":messageData['destination'], "type":'text/plain'})
 				conn.commit()
 			except (KeyError, TypeError) as e:
 				print e
@@ -119,6 +125,35 @@ def insertMessage(messageData):
 	conn.close()
 	return 0
 
+
+# Store the file messages on the database
+def storeFile(fileData):
+	conn = connectDatabase()
+	c = conn.cursor()
+	try:
+		sql_select_message = 'SELECT * FROM messageData WHERE senderUPI==:username AND time_stamp==:time_stamp AND message_type==:type'
+		c.execute(sql_select_message, {"username":fileData['sender'], "time_stamp":fileData['stamp'], "type":fileData['content_type']})
+		if c.fetchone() is None:
+			try:
+				sql_insert_message = 'INSERT INTO messageData (senderUPI, time_stamp, message, destinationUPI, message_type) VALUES (:username, :time_stamp, :message, :destination, :type)'
+				c.execute(sql_insert_message, {"username":fileData['sender'], "time_stamp":fileData['stamp'], "message":fileData['filename'], "destination":fileData['destination'], "type":fileData['content_type']})
+			except (KeyError, TypeError) as e:
+				print e
+				conn.close()
+				return 1
+			except Error as e:
+				print e
+				conn.close()
+				return 4
+		else:
+			print "Message saved already"
+	except Error as e:
+		print e
+		return 4
+	conn.close()
+	return 0
+
+
 # Get the IP from the database
 def getIP(destUPI):
 	conn = connectDatabase()
@@ -135,6 +170,7 @@ def getIP(destUPI):
 			return getIP
 	except Error as e:
 		print "Error - Not able to print get name"
+		conn.close()
 		return 0
 
 
@@ -176,6 +212,7 @@ def dropdownGet():
 			print "Error - in converting tuple to list"
 	except Error as e:
 		print "Error - not able to get users"
+	conn.close()
 	return 0
 
 
@@ -202,6 +239,7 @@ def storeProfile(profileData, upi):
 		except Error as e:
 			print e
 			return 1
+	conn.close()
 	return 0
 
 
@@ -217,6 +255,7 @@ def getProfile(user):
 		return profile
 	except (KeyError, TypeError) as e:
 		print "Error - " + e
+		conn.close()
 		return 0
 
 
