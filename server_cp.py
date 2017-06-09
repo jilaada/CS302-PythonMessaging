@@ -223,7 +223,6 @@ class MainApp(object):
 		return Page
 
 
-	
 	def sendText(self, message):
 		destination = activeUser
 		epoch_time = float(time.time())
@@ -251,12 +250,22 @@ class MainApp(object):
 
 
 	@cherrypy.expose()
-	def userProfile(self, user=None):
+	def userProfile(self, user):
 		try:
 			internalComm.profile(user, cherrypy.session['username'])
-			raise cherrypy.HTTPRedirect('/')
+			try:
+				data = databaseFunctions.getProfile(user)
+				if data == None:
+					output_dict = {"fullname":user, "position":"Not Sepcified", "description":"Not Specified", "location":"Not Specified", "picture":"Looks like they has no picture"}
+				else:
+					profile = [sub for sub in data]
+					output_dict = {"fullname": profile[2], "position": profile[3], "description": profile[4], "location": profile[5], "picture": profile[6]}
+				print output_dict
+				return json.dumps(output_dict)
+			except Error as e:
+				print e
 		except (KeyError, TypeError):
-			raise cherrypy.HTTPRedirect('/')
+			print "Getting profile failed"
 
 
 	@cherrypy.expose()
@@ -275,7 +284,7 @@ class MainApp(object):
 
 	@cherrypy.expose()
 	def listAPI(self):
-		output_dict = "/<receiveMessage>[sender][destination][message][stamp]/<getProfile>[profile_username]/<ping>[sender]Encoding/<receiveFile>[sender][destination][file]<2>Encryption<0>Hashing<0>"
+		output_dict = "/<receiveMessage>[sender][destination][message][stamp]\n/<getProfile>[profile_username]\n/<ping>[sender]\n/<receiveFile>[sender][destination][file]\nEncryption 0\nHashing 0"
 		return output_dict
 
 
@@ -290,6 +299,16 @@ class MainApp(object):
 	def handshake(self):
 		inputMessage = cherrypy.request.json
 		pass
+
+	@cherrypy.expose()
+	@cherrypy.tools.json_in()
+	def getStatus(self):
+		inputMessage = cherrypy.request.json
+		status = databaseFunctions.getStatus(inputMessage['profile_username'])
+		if status == "0":
+			return "Offline"
+		else:
+			return status
 
 
 	@cherrypy.expose()
@@ -323,11 +342,27 @@ class MainApp(object):
 			data = databaseFunctions.getProfile(cherrypy.session['username'])
 			profile = [sub for sub in data]
 			output_dict = {"fullname": profile[2], "position": profile[3], "description": profile[4], "location": profile[5], "picture": profile[6]}
-			print json.dumps(output_dict)
 			return json.dumps(output_dict)
 		except Error as e:
 			print e
 			return "1, profile not found" 
+
+
+	@cherrypy.expose()
+	def getAllUsers(self):
+		userList = databaseFunctions.getUsers()
+		dic = {}
+		for index, item in enumerate(userList):
+			dic[index] = {"upi": item[0]}
+		return json.dumps(dic)
+
+
+	@cherrypy.expose()
+	def storeStatus(self, status):
+		# Save the status in the database
+		dic = {"status":status}
+		jsonDump = json.dumps(dic)
+		databaseFunctions.storeStatus(jsonDump, cherrypy.session['username'])
 
 	# =================
 	# Private functions

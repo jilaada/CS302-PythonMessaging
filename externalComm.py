@@ -101,6 +101,14 @@ def getAllUsers():
 # Get the users who are online
 def usersOnline(user, pw):
 	users = autoGetList(user, pw).read()
+	userList = json.loads(users)
+	for items in userList:
+		portIP = databaseFunctions.getIP(userList[items]['username'])
+		print userList[items]['username']
+		try:
+			reqStatus(userList[items]['username'], portIP['ip'], portIP['port'])
+		except Error as e:
+			print "Error in getting statuses"
 	databaseFunctions.refreshDatabase(users)
 
 
@@ -139,11 +147,30 @@ def reqProfile(jsonDump, ip, port):
 	dest = "http://" + ip + ":" + port + "/getProfile?"
 	try:
 		req = urllib2.Request(dest, jsonDump, {'Content-Type':'application/json'})
-		response = urllib2.urlopen(req, timeout=10)
+		response = urllib2.urlopen(req, timeout=1)
 		return response
 	except urllib2.HTTPError, e:
 		print str(e)
 	except urllib2.URLError, e:
+		print str(e)
+	except Error as e:
+		print str(e)
+	return 0
+
+
+def reqStatus(username, ip, port):
+	dest = "http://" + ip + ":" + port + "/getStatus?"
+	user = {"profile_username":username}
+	jsonDump = json.dumps(user)
+	try:
+		req = urllib2.Request(dest, jsonDump, {'Content-Type':'application/json'})
+		response = urllib2.urlopen(req, timeout=1)
+		databaseFunctions.storeStatus(response.read(), username)
+	except urllib2.HTTPError, e:
+		print str(e)
+	except urllib2.URLError, e:
+		print str(e)
+	except TypeError as e:
 		print str(e)
 	except Error as e:
 		print str(e)

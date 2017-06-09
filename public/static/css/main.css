@@ -35,6 +35,14 @@ li a, .session {
     text-decoration: none;
 }
 
+.status {
+	display: block;
+	padding: 0;
+	height: 50px;
+	background-color: #333;
+	color: white;
+}
+
 /* Change the link color to #111 (black) on hover */
 li a:hover {
     background-color: #444;
@@ -167,6 +175,7 @@ textarea {
     text-align: center;
     float: center;
     width: auto;
+    color: white;
     background-color: gray;
     font: 300 22px/30px "Myriad Set Pro", sans-serif;
     text-transform: uppercase;

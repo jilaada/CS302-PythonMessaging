@@ -5,14 +5,14 @@ function displayMessages(user) {
 	$('.name-bar').html('');
 	$(".name-bar").append(user);
 	
-	if (activeUser == undefined) {
-		//document.getElementById("Home").style.backgroundColor = "#f1f1f1";
-		document.getElementById(user).style.backgroundColor = "#4CAF50";
-		alert("here")
-	} else {
-		document.getElementById(activeUser).style.backgroundColor = "#f1f1f1";
-		document.getElementById(user).style.backgroundColor = "#4CAF50";
-	}
+	//if (activeUser == undefined) {
+		//document.getElementById("Home").style.backgroundColor = "initial";
+		//document.getElementById(user).style.backgroundColor = "#4CAF50";
+		//alert("here")
+	//} else {
+		//document.getElementById(activeUser).style.backgroundColor = "initial";
+		//document.getElementById(user).style.backgroundColor = "#4CAF50";
+	//}
 
 	activeUser = user
 	var message_request;
@@ -40,10 +40,6 @@ $('input[type=file]').change(function(){
 			start: function(file){
 				//upload started
 				console.log("Logged File Uploaded");
-			},
- 
-			progress: function(progress){
-				//received progress 
 			},
  
 			success: function(data){
@@ -86,6 +82,18 @@ function sendMessage() {
 	}
 }
 
+function getStatus() {
+	var state
+	state = document.getElementById('status').value;
+	message_request = "/storeStatus?status=" + state
+	$.get(message_request, function(response) {
+		
+	});
+	setTimeout(function() {
+		getStatus()
+	}, 20000);
+}
+
 function refreshMessages(user) {
     var message_request;
     message_request = "/getMessages?user=" + user;
@@ -98,4 +106,6 @@ function refreshMessages(user) {
 $(document).ready(function() {
 	// Starting
 	refreshUsers()
+	//setStatus()
+	getStatus()
 });

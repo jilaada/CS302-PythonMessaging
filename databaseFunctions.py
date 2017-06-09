@@ -58,6 +58,21 @@ def addUser(user):
 	conn.close()
 	pass
 
+
+def getUsers():
+	sql_select_message = 'SELECT upi FROM userRegister'
+	conn = connectDatabase()
+	conn.row_factory = sqlite3.Row
+	c = conn.cursor()
+	try:
+		c.execute(sql_select_message)
+		userList = c.fetchall()
+	except Error:
+		print "Error in getting users"
+		userList = "0"
+	conn.close()
+	return userList
+
 # Refresh Database will refresh and add the the activity of existing users in the list
 def refreshDatabase(onlineUsers):
 	dic = json.loads(onlineUsers)
@@ -242,6 +257,39 @@ def storeProfile(profileData, upi):
 			return 1
 	conn.close()
 	return 0
+
+
+
+def storeStatus(status_in, user):
+	try:
+		status = json.loads(status_in)
+		conn = connectDatabase()
+		c = conn.cursor()
+		try:
+			sql_update_status = 'UPDATE userRegister SET status = :stat WHERE upi==:upi'
+			c.execute(sql_update_status, {"upi":user, "stat":status['status']})
+			conn.commit()
+			conn.close()
+		except Error as e:
+			conn.close()
+			print str(e)
+	except ValueError as e:
+		print str(e)
+	except Error as e:
+		print str(e)
+
+
+def getStatus(user):
+	conn = connectDatabase()
+	conn.row_factory = sqlite3.Row
+	c = conn.cursor()
+	try:
+		sql_update_status = 'SELECT status FROM userRegister WHERE upi==:upi'
+		c.execute(sql_update_status, {"upi":user})
+		status = c.fetchone()
+		return status['status']
+	except Error as e:
+		return "0"
 
 
 def getProfile(user):
