@@ -31,122 +31,22 @@ from sqlite3 import Error
 
 #This function will be used to import designs in to the home page
 def createHomePage(user):
-	f = open("public/home.html")
+	f = open("public/profile.html")
 	Page = f.read()
 	f.close()
 	# Get data from the database about the user
 	profileData = databaseFunctions.getProfile(user)
-
-	replaceText = '''<ul class="side-nav">
-				<li style="width:100%"><a class="active" href="/">Home</a></li>
-				<li style="width:100%"><a class="side" href="/messageWrite">Messages</a></li>
-				<li style="width:100%"><a class="side" href="/editProfile">Edit Profile</a></li>
-				<li style="width:100%"><a class="side" href="/">Settings</a></li>
-				</ul>'''
-
-	replaceText1 =   '''<div class="profile">
-					<h2>
-					''' + profileData['fullname'] + '''
-					</h2>
-					<div class="imgcontainer">
-						<img src="''' + profileData['picture'] + '''" alt="Avatar" class="avatar">
-					</div>
-					<h3>
-						Position: ''' + profileData['position'] + '''
-					</h3>
-					<h3>
-						Location: ''' + profileData['location'] + '''
-					</h3>
-					<h3>
-						Description: ''' + profileData['description'] + '''
-					</h3>
-					</div>'''
-    
-	script = "<script></script>"
-	Page = Page.replace('{:session}', user)
-	Page = Page.replace('{:navActive}', replaceText)
-	Page = Page.replace('{:script}', script)
-	returnPage = Page.replace('{:profile}', replaceText1)
-	return returnPage
-
-
-# Edit main profile page
-def createEditProfile(user):
-	f = open("public/home.html")
-	Page = f.read()
-	f.close()
-	profileData = databaseFunctions.getProfile(user)
-
-	replaceText = '''<ul class="side-nav">
-					<li style="width:100%"><a class="side" href="/">Home</a></li>
-					<li style="width:100%"><a class="side" href="/messageWrite">Messages</a></li>
-					<li style="width:100%"><a class="active" href="/editProfile">Edit Profile</a></li>
-					<li style="width:100%"><a class="side" href="/">Settings</a></li>
-					</ul>'''
-
-	replaceText1 = '''<div class="profile">
-					<form action="/saveProfile" method="post" enctype="multipart/form-data" class="editProfile">
-		            Name: <input type="text" name="fullname" value="''' + profileData['fullname'] + '''"/><br/>
-                    Picture: <input type="text" name="picture" value="''' + profileData['picture'] + '''"/><br/>
-		            Location: <input type="text" name="location" value="''' + profileData['location'] + '''"/><br/>
-		            Position: <input type="text" name="position" value="''' + profileData['position'] + '''"/><br/>
-		            Description:<br/> <textarea name="description">''' + profileData['description'] + '''</textarea><br/>
-		            <button type="submit">Save Profile</button></form>
-		            </div>'''
-    
-	script = "<script></script>"
-	Page = Page.replace('{:session}', user)
-	Page = Page.replace('{:navActive}', replaceText)
-	Page = Page.replace('{:script}', script)
-	returnPage = Page.replace('{:profile}', replaceText1)
+	returnPage = Page.replace('{:session}', user)
 	return returnPage
 
 
 # Create the messages page
 def createMessages(user, pw):
-	f = open("public/home.html")
+	f = open("public/messages.html")
 	Page = f.read()
 	f.close()
 	# Get the full list of users
-	try:
-		userList = externalComm.autoGetList(user, pw).read()
-		try:
-			dic = json.loads(userList)
-		except TypeError as e:
-			print e
-			dic = None
-	except Error as e:
-		print e
-
-	replaceText = '<ul class="side-nav">' \
-	              '<li style="width:100% float:center"><a class="active" href="/">Home</a></li>'
-
-	try:
-		for items in dic:
-			replaceText += '<li style="width:100%"><a class="side" href="javascript:displayMessages(\'' + dic[items]['username'] + '\')">' + dic[items]['username'] + '</a></li>'
-	except Error as e:
-		print e
-
-	replaceText1 = '''<div class="name-bar">
-                    </div>
-                    <div class="messages">
-                    </div>
-                    <div class="create-message">
-                        <div class="form-box">
-                            <textarea class="write-message" id="clear" name="message"></textarea>
-                            <input class="send" id="file" type="file" name="dataFile"/>
-                            <button class="send" id="send-button" type="submit">Send</button>
-                        </div>
-                    </div>'''
-    
-	script = '''<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-				<script src="http://malsup.github.com/jquery.form.js"></script>
-				<script type="text/javascript" src="public/simpleUpload.js"></script>
-				<script src="public/main.js"></script>'''
-	Page = Page.replace('{:session}', user)
-	Page = Page.replace('{:navActive}', replaceText)
-	Page = Page.replace('{:script}', script)
-	returnPage = Page.replace('{:profile}', replaceText1)
+	returnPage = Page.replace('{:session}', user)
 	return returnPage
 
 
@@ -204,11 +104,11 @@ def createUserList(user, pw):
 		print e
 	
 	replaceText = '<ul class="side-nav">' \
-	              '<li style="width:100% float:center"><a class="active" href="/">Home</a></li>'
+	              '<li style="width:100% id="Home" float:center"><a class="active" href="/">Home</a></li>'
 
 	try:
 		for items in dic:
-			replaceText += '<li style="width:100%"><a class="side" href="javascript:displayMessages(\'' + dic[items]['username'] + '\')">' + dic[items]['username'] + '</a></li>'
+			replaceText += '<li style="width:100%"><a class="side" id="' + dic[items]['username'] + '" href="javascript:displayMessages(\'' + dic[items]['username'] + '\')">' + dic[items]['username'] + '</a></li>'
 	except Error as e:
 		print e
 	return replaceText

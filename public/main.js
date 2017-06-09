@@ -4,6 +4,16 @@ var activeUser
 function displayMessages(user) {
 	$('.name-bar').html('');
 	$(".name-bar").append(user);
+	
+	if (activeUser == undefined) {
+		//document.getElementById("Home").style.backgroundColor = "#f1f1f1";
+		document.getElementById(user).style.backgroundColor = "#4CAF50";
+		alert("here")
+	} else {
+		document.getElementById(activeUser).style.backgroundColor = "#f1f1f1";
+		document.getElementById(user).style.backgroundColor = "#4CAF50";
+	}
+
 	activeUser = user
 	var message_request;
 	// Get the messages from the database somehow
@@ -37,7 +47,8 @@ $('input[type=file]').change(function(){
 			},
  
 			success: function(data){
-				//upload successful 
+				//upload successful
+				alert("File Upload Failed");
 				console.log("Logged File Sent");
 				refreshMessages(activeUser)
 			},
@@ -49,6 +60,7 @@ $('input[type=file]').change(function(){
  
 		});
 	});
+
 
 
 function refreshUsers() {

@@ -21,14 +21,18 @@ AUTHOR: JILADA ECCLESTON
 		</ul>
         <div class="dash">
             <ul class="side-nav">
-				<li style="width:100%"><a class="side" href="/">Home</a></li>
+				<li style="width:100%"><a class="active" href="/">Home</a></li>
 				<li style="width:100%"><a class="side" href="/messageWrite">Messages</a></li>
-				<li style="width:100%"><a class="active" href="/editProfile">Edit Profile</a></li>
-				<li style="width:100%"><a class="side" href="/">Settings</a></li>
+				<li style="width:100%"><a class="side" href="javascript:editProfile()">Edit Profile</a></li>
+				<li style="width:100%"><a class="side" href="/">View Profiles</a></li>
 			</ul>
         </div>
-		{:profile}
+		<div class="profile">
+			Profile Not Accessible
+		</div>
 	</div>
 </body>
-{:script}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="http://malsup.github.com/jquery.form.js"></script>
+<script src="public/profile.js"></script>
 </html>

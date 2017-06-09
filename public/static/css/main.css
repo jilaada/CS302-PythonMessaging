@@ -155,10 +155,15 @@ textarea {
     font: 300 14px/23px "Myriad Set Pro", sans-serif;
 }
 
+.crate {
+	margin: 0 0 0 20%;
+	height: 94%;
+}
+
 .name-bar {
-    margin: 0 0 0 20%;
+    margin: 0;
 	padding: 10px;
-    height: 3.0%;
+    height: 4%;
     text-align: center;
     float: center;
     width: auto;
@@ -168,9 +173,9 @@ textarea {
 }
 
 .messages {
-    margin: 0 0 0 20%;
+    margin: 0;
 	padding: 0 1%;
-    height: 81.4%;
+    height: 85%;
     width: auto;
     overflow: auto;
     background-color: white;
@@ -179,7 +184,7 @@ textarea {
 }
 
 .create-message {
-    margin: 0 0 0 20%;
+    margin: 0;
     border: 1px solid #ccc;
     background-color: white;
     height: 8.8%;

@@ -43,11 +43,7 @@ def saveFile(jsonDump):
 		data = base64.decodestring(jsonDump['file'])
 		f.write(data)
 		f.close()
-		try:
-			print "here"
-		except Error as e:
-			print "Error - " + e
 	except (KeyError, TypeError) as e:
-		print "Error - " + e
+		print "Error - " + str(e)
 		return 1
 	return 0

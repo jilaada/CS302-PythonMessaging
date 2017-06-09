@@ -53,7 +53,7 @@ class MainApp(object):
 	@cherrypy.expose
 	def default(self, *args, **kwargs):
 		"""The default page, given when we don't recognise where the request is for."""
-		Page = "I don't know where you're trying to go, so have a 404 Error."
+		Page = "The page you are requesting does not exist: click here"
 		cherrypy.response.status = 404
 		return Page
 
@@ -137,10 +137,11 @@ class MainApp(object):
 	@cherrypy.tools.json_in()
 	def receiveMessage(self):
 		inputMessage = cherrypy.request.json
-		print messageData
-		currentUser = self.getSessionUser()
+		try:
+			currentUser = self.getSessionUser()
+		except Error as e:
+			print e
 		databaseFunctions.insertMessage(inputMessage)
-		print inputMessage
 		return "0"
 
 
@@ -157,11 +158,13 @@ class MainApp(object):
 	@cherrypy.tools.json_in()
 	def receiveFile(self):
 		inputFile = cherrypy.request.json
-		currentUser = self.getSessionUser()
 		# Leaving data out of my database that isn't meant for me
-		if inputFile['destination'] == currentUser:
-			internalComm.saveFile(inputFile)
-			databaseFunctions.storeFile(inputFile)
+		try:
+			currentUser = self.getSessionUser()
+		except Error as e:
+			print e
+		internalComm.saveFile(inputFile)
+		databaseFunctions.storeFile(inputFile)
 		return "0"
 
 
@@ -182,6 +185,11 @@ class MainApp(object):
 				ipdata = databaseFunctions.getIP(destination)
 				send = externalComm.sendFile(out_json, ipdata["ip"], ipdata["port"])
 				databaseFunctions.storeFile(output_dict)
+				try:
+					# Store the file sent in the folder to be displayed on the screen
+					internalComm.saveFile(output_dict)
+				except Error as e:
+					print e
 				if send == "0":
 					print "--- File Sent Successfully ---"
 				else:
@@ -308,6 +316,18 @@ class MainApp(object):
 	def sendMessage(self, message):
 		self.sendText(message)
 		return "0"
+
+	@cherrypy.expose()
+	def getUserProfile(self):
+		try: 
+			data = databaseFunctions.getProfile(cherrypy.session['username'])
+			profile = [sub for sub in data]
+			output_dict = {"fullname": profile[2], "position": profile[3], "description": profile[4], "location": profile[5], "picture": profile[6]}
+			print json.dumps(output_dict)
+			return json.dumps(output_dict)
+		except Error as e:
+			print e
+			return "1, profile not found" 
 
 	# =================
 	# Private functions
