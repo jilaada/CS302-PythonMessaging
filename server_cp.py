@@ -256,7 +256,7 @@ class MainApp(object):
 			try:
 				data = databaseFunctions.getProfile(user)
 				if data == None:
-					output_dict = {"fullname":user, "position":"Not Sepcified", "description":"Not Specified", "location":"Not Specified", "picture":"Looks like they has no picture"}
+					output_dict = {"fullname":user, "position":"Not Sepcified", "description":"Not Specified", "location":"Not Specified", "picture":"https://sorted.org.nz/themes/sorted/assets/images/user-icon-grey.svg"}
 				else:
 					profile = [sub for sub in data]
 					output_dict = {"fullname": profile[2], "position": profile[3], "description": profile[4], "location": profile[5], "picture": profile[6]}
