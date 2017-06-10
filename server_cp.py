@@ -49,6 +49,7 @@ class MainApp(object):
 				  'tools.staticdir.dir': os.path.abspath(os.getcwd()),
 				 }
 
+
 	# Function will be called when the user decides to go someone unspecified by the system
 	@cherrypy.expose
 	def default(self, *args, **kwargs):
@@ -114,10 +115,11 @@ class MainApp(object):
 		else:
 			raise cherrypy.HTTPRedirect('/login')
 
-
+	
 	@cherrypy.expose
 	def signout(self):
 		"""Logs the current user out, expires their session"""
+		print "SIGNING OUT OF THE SERVER"
 		username = cherrypy.session.get('username')
 		password = cherrypy.session.get('password')
 		if username is None:
@@ -278,6 +280,26 @@ class MainApp(object):
 			print e
 		raise cherrypy.HTTPRedirect('/')
 
+	@cherrypy.expose()
+	def createEvent(self, guest=None, name=None, start=None, end=None, desc=None, loc=None):
+		pattern = '%d-%m-%Y %H:%M:%S'
+		try:
+			start_epoch = float(time.mktime(time.strptime(start, pattern)))
+			end_epoch = float(time.mktime(time.strptime(start, pattern)))
+		except Error as e:
+			print str(e)
+			raise cherrypy.HTTPRedirect('/')
+		#Try to send to user then add to 
+		output_dict = {"sender":str(cherrypy.session['username']), "destination": guest, "event_name": name, "event_description": desc, "event_location": loc, "start_time": start_epoch, "end_time":end_epoch, "attendance": 0}
+		dataIP = databaseFunctions.getIP(guest)
+		result = externalComm.reqEvent(output_dict, dataIP['ip'], dataIP['port'])
+		if result == 0:
+		# Add to the database
+			databaseFunctions.addEvent(output_dict, cherrypy.session['username'])
+		else:
+			print "Sending to guest unsuccessful"
+		raise cherrypy.HTTPRedirect('/')
+
 	# =================
 	# Other functions
 	# =================
@@ -306,9 +328,10 @@ class MainApp(object):
 		inputMessage = cherrypy.request.json
 		status = databaseFunctions.getStatus(inputMessage['profile_username'])
 		if status == "0":
-			return "Offline"
+			jsonDump = json.dumps({"status":"Offline"})
 		else:
-			return status
+			jsonDump = json.dumps({"status":status})
+		return jsonDump
 
 
 	@cherrypy.expose()
@@ -363,6 +386,59 @@ class MainApp(object):
 		dic = {"status":status}
 		jsonDump = json.dumps(dic)
 		databaseFunctions.storeStatus(jsonDump, cherrypy.session['username'])
+
+
+	@cherrypy.expose()
+	@cherrypy.tools.json_in()
+	def receiveEvent(self):
+		inputMessage = cherrypy.request.json
+		print inputMessage
+		try:
+			output_dict = {"guest":inputMessage['destination'], "event_name":inputMessage['event_name'], "event_desc":inputMessage['event_description'], "event_loc":inputMessage['event_location'], "start_time":inputMessage['start_time'], "end_time":inputMessage['end_time'], "attendance": 0}
+			databaseFunctions.addEvent(output_dict, inputMessage['sender'])
+			print "Here right now"
+		except KeyError as e:
+			print str(e)
+			try:
+				output_dict = {"guest": inputMessage['destination'], "event_name": inputMessage['event_name'], "start_time": inputMessage['start_time'], "end_time": inputMessage['end_time'], "attendance": 0}
+				databaseFunctions.addEvent(output_dict, inputMessage['sender'])
+			except KeyError as e:
+				print str(e)
+				return "1"
+		return "0"
+
+	@cherrypy.expose()
+	@cherrypy.tools.json_in()
+	def acknowledgeEvent(self):
+		inputAcknowledge = cherrypy.request.json
+		update = databaseFunctions.updateEvent(inputAcknowledge)
+		if update == 0:
+			print "Event is updated"
+		else:
+			print "Event has been successfully updated"
+		return "0"
+
+
+	@cherrypy.expose()
+	def getEvents(self):
+		# Get the events from the database
+		eventList = databaseFunctions.gatherEvents(cherrypy.session['username'])
+		print eventList
+		if eventList is not 1:
+			dic = []
+			for item in eventList:
+				dic.append({"host": item[2], "guest": item[3], "event_name": item[4], "description": item[8], "location": item[9], "end_time": item[6], "start_time": item[5], "id":item[0], "attendance":item[7]})
+		else:
+			dic = {"Event":"None"}
+		return json.dumps(dic)
+
+
+	@cherrypy.expose()
+	def acknowledgeHost(self, attendance, row_id):
+		# Update the attendance
+		host = databaseFunctions.updateAttendance(attendance, row_id)
+		print host
+		#dataIP = databaseFunctions.getIP(host['host'])
 
 	# =================
 	# Private functions

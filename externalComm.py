@@ -16,6 +16,7 @@ import urllib
 import urllib2
 import json
 import socket
+import atexit
 import databaseFunctions
 from sqlite3 import Error
 import time
@@ -102,14 +103,13 @@ def getAllUsers():
 def usersOnline(user, pw):
 	users = autoGetList(user, pw).read()
 	userList = json.loads(users)
+	databaseFunctions.refreshDatabase(users)
 	for items in userList:
 		portIP = databaseFunctions.getIP(userList[items]['username'])
-		print userList[items]['username']
 		try:
 			reqStatus(userList[items]['username'], portIP['ip'], portIP['port'])
 		except Error as e:
 			print "Error in getting statuses"
-	databaseFunctions.refreshDatabase(users)
 
 
 # Send the message data to the users
@@ -117,7 +117,7 @@ def send(jsonDump, ip, port):
 	dest = "http://" + ip + ":" + port + "/receiveMessage"
 	try:
 		req = urllib2.Request(dest, jsonDump, {'Content-Type':'application/json'})
-		response = urllib2.urlopen(req, timeout=10)
+		response = urllib2.urlopen(req, timeout=1)
 	except urllib2.HTTPError, e:
 		print e
 		response = 0
@@ -131,7 +131,7 @@ def sendFile(jsonDump, ip, port):
 	dest = "http://" + ip + ":" + port + "/receiveFile"
 	try:
 		req = urllib2.Request(dest, jsonDump, {'Content-Type':'application/json'})
-		response = urllib2.urlopen(req, timeout=10)
+		response = urllib2.urlopen(req, timeout=1)
 		print response.read()
 	except urllib2.HTTPError, e:
 		print e
@@ -147,13 +147,13 @@ def reqProfile(jsonDump, ip, port):
 	dest = "http://" + ip + ":" + port + "/getProfile?"
 	try:
 		req = urllib2.Request(dest, jsonDump, {'Content-Type':'application/json'})
-		response = urllib2.urlopen(req, timeout=1)
+		response = urllib2.urlopen(req, timeout=0.2)
 		return response
 	except urllib2.HTTPError, e:
 		print str(e)
 	except urllib2.URLError, e:
 		print str(e)
-	except Error as e:
+	except Exception as e:
 		print str(e)
 	return 0
 
@@ -164,7 +164,7 @@ def reqStatus(username, ip, port):
 	jsonDump = json.dumps(user)
 	try:
 		req = urllib2.Request(dest, jsonDump, {'Content-Type':'application/json'})
-		response = urllib2.urlopen(req, timeout=1)
+		response = urllib2.urlopen(req, timeout=0.2)
 		databaseFunctions.storeStatus(response.read(), username)
 	except urllib2.HTTPError, e:
 		print str(e)
@@ -172,6 +172,42 @@ def reqStatus(username, ip, port):
 		print str(e)
 	except TypeError as e:
 		print str(e)
-	except Error as e:
+	except Exception as e:
 		print str(e)
 	return 0
+
+
+def reqEvent(eventDump, ip, port):
+	try:
+		dest = "http://" + ip + ":" + port + "/receiveEvent?"
+		jsonDump = json.dumps(eventDump)
+		try:
+			req = urllib2.Request(dest, jsonDump, {'Content-Type':'application/json'})
+			response = urllib2.urlopen(req, timeout=0.2)
+			read = response.read()
+			if read[0] == "0":
+				return 0
+			else:
+				return 1
+		except Exception as e:
+			print str(e)
+	except Exception as e:
+		print str(e)
+
+
+def reqAcknowledge(attendanceDump, ip, port):
+	try:
+		dest = "http://" + ip + ":" + port + "/acknowledgeEvent?"
+		jsonDump = jsondumps(attendanceDump)
+		try:
+			req = urllib2.Request(dest, jsonDump, {'Content-Type':'application/json'})
+			response = urllib2.urlopen(req, timeout=0.2)
+			read = response.read()
+			if read[0] == "0":
+				return 0
+			else:
+				return 1
+		except Exception as e:
+			print str(e)
+	except Exception as e:
+		print str(e)

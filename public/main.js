@@ -46,7 +46,6 @@ $('input[type=file]').change(function(){
 				//upload successful
 				alert("File Upload Failed");
 				console.log("Logged File Sent");
-				refreshMessages(activeUser)
 			},
  
 			error: function(error){
@@ -55,8 +54,9 @@ $('input[type=file]').change(function(){
 			}
  
 		});
+		
+		refreshMessages(activeUser)
 	});
-
 
 
 function refreshUsers() {

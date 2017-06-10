@@ -26,7 +26,7 @@ html, body {
     height: 53px;
 }
 
-li a, .session {
+li a, .session, .header {
     display: block;
     height: 6%;
     color: white;
@@ -258,4 +258,37 @@ textarea {
 
 #file {
 	height: auto;
+}
+
+.upcoming-event {
+	margin: 0;
+	padding: 10px;
+    height: 4%;
+    text-align: left;
+    float: center;
+    width: 100%;
+    color: white;
+    background-color: gray;
+    font: 300 22px/30px "Myriad Set Pro", sans-serif;
+    text-transform: uppercase;
+}
+
+.event-header {
+	margin: 0;
+	padding: 20px;
+    height: 4%;
+    text-align: left;
+    width: 100%;
+    color: gray;
+    background-color: white;
+    font: 300 18px/26px "Myriad Set Pro", sans-serif;
+    text-transform: uppercase;
+}
+
+.desc {
+	font: 300 14px/22px "Myriad Set Pro", sans-serif;
+}
+
+#status {
+	font: 300 16px/24px "Myriad Set Pro", sans-serif;
 }

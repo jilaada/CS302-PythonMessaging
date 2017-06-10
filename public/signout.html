@@ -9,49 +9,71 @@ AUTHOR: JILADA ECCLESTON
 	<meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta http-equiv="refresh" content="30">
     <title>Talkie</title>
     <link rel="stylesheet" href="static/css/main.css" type="text/css">
 </head>
 
 <body>
 	<div class="container">
-        <ul class="top-nav">
-            <li style="float:right"><a href="/signout">Sign Out</a></li>
-        </ul>
+		<ul class="top-nav">
+            <li class="session" style="float:left">Welcome {:session}!</li>
+            <li  style="float:left">
+				<select id="status">
+					<option value="Online">Online</option>
+					<option value="Away">Away</option>
+					<option value="Busy">Do Not Disturb</option>
+					<option value="Offline">Offline</option>
+				</select>
+            </li>
+			<li style="float:right"><a href="/signout">Sign Out</a></li>
+		</ul>
         <div class="dash">
             <ul class="side-nav">
 				<li style="width:100%"><a class="active" href="/">Home</a></li>
 				<li style="width:100%"><a class="side" href="/messageWrite">Messages</a></li>
-				<li style="width:100%"><a class="side" href="/editProfile">Edit Profile</a></li>
-				<li style="width:100%"><a class="side" href="/">Settings</a></li>
+				<li style="width:100%"><a class="side" href="javascript:editProfile()">Edit Profile</a></li>
+				<li style="width:100%"><a class="side" href="javaScript:viewProfiles()">View Profiles</a></li>
+				<li style="width:100%"><a class="side" href="javaScript:editEvent()">Add Events</a></li>
+				<li style="width:100%"><a class="side" href="javaScript:viewEvent()">View Events</a></li>
 			</ul>
         </div>
-        <div class="crate">
-			<div class="name-bar">
+		<div class="profile">
+			<div class="upcoming-event">Upcoming events
 			</div>
-			<div class="messages">
-				<div class="message-box-user">Jecc724: Hello World hello this is me I jhave just typing random strings hahahahahaahahahakjsksksksjddjiiiv jdjdjfjdfjdl</div>
-				<div class="message-box-dest">Jecc724: Hello World hello this is me I jhave just typing random strings hahahahahaahahahakjsksksksjddjiiiv jdjdjfjdfjdl</div>
-				<div class="message-box-dest">Jecc724: Hello World hello this is me I jhave just typing random strings hahahahahaahahahakjsksksksjddjiiiv jdjdjfjdfjdl</div>
-				<div class="message-box-dest">Jecc724: Hello World hello this is me I jhave just typing random strings hahahahahaahahahakjsksksksjddjiiiv jdjdjfjdfjdl</div>
-				<div class="message-box-user">Jecc724: Hello World hello this is me I jhave just typing random strings hahahahahaahahahakjsksksksjddjiiiv jdjdjfjdfjdl</div>
-				<div class="message-box-dest">Jecc724: Hello World hello this is me I jhave just typing random strings hahahahahaahahahakjsksksksjddjiiiv jdjdjfjdfjdl</div>
-				<div class="message-box-dest">Jecc724: Hello World hello this is me I jhave just typing random strings hahahahahaahahahakjsksksksjddjiiiv jdjdjfjdfjdl</div>
-				<div class="message-box-dest">Jecc724: Hello World hello this is me I jhave just typing random strings hahahahahaahahahakjsksksksjddjiiiv jdjdjfjdfjdl</div>
-				<div class="message-box-user">Jecc724: Hello World hello this is me I jhave just typing random strings hahahahahaahahahakjsksksksjddjiiiv jdjdjfjdfjdl</div>
-				<div class="message-box-dest">Jecc724: Hello World hello this is me I jhave just typing random strings hahahahahaahahahakjsksksksjddjiiiv jdjdjfjdfjdl</div>
-				<div class="message-box-dest">Jecc724: Hello World hello this is me I jhave just typing random strings hahahahahaahahahakjsksksksjddjiiiv jdjdjfjdfjdl</div>
-				<div class="message-box-dest">Jecc724: Hello World hello this is me I jhave just typing random strings hahahahahaahahahakjsksksksjddjiiiv jdjdjfjdfjdl</div>
-			</div>
-			<div class="create-message">
-				<div class="form-box">
-					<textarea class="write-message" name="description"></textarea>
-					<input class="send" type="file" name="dataFile"/>
-					<button class="send" type="submit">Send</button>
-				</div>
-			</div>
-        </div>
+			<ul class="event-header">
+				<li style="width:100%">Test Event</li>
+				<ul >
+					<li class="desc">Host: </li>
+					<li class="desc">Location: </li>
+					<li class="desc">Start Time: </li>
+					<li class="desc">End Time: </li>
+					<li class="desc">Location: </li>
+					<li class="desc">Acknowledge: </li>
+					<select id="status">
+						<option value="Going">Going</option>
+						<option value="Maybe">Maybe</option>
+						<option value="Not Going">Not Going</option>
+					</select>
+				</ul>
+				<li style="width:100%">Test Event</li>
+				<ul >
+					<li class="desc">Host: </li>
+					<li class="desc">Location: </li>
+					<li class="desc">Start Time: </li>
+					<li class="desc">End Time: </li>
+					<li class="desc">Location: </li>
+					<li class="desc">Acknowledge: </li>
+					<select id="status">
+						<option value="Going">Going</option>
+						<option value="Maybe">Maybe</option>
+						<option value="Not Going">Not Going</option>
+					</select>
+				</ul>
+			</ul>
+		</div>
 	</div>
 </body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="http://malsup.github.com/jquery.form.js"></script>
+<script src="public/profile.js"></script>
 </html>

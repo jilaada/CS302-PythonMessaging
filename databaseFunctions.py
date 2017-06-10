@@ -15,6 +15,7 @@ import urllib
 import json
 import time
 import sqlite3
+import hashlib
 from sqlite3 import Error
 
 # =====================
@@ -26,12 +27,14 @@ def createTable():
 	sql_create_table_usersRegisters = "CREATE TABLE IF NOT EXISTS userRegister (id INTEGER PRIMARY KEY AUTOINCREMENT, upi TEXT UNIQUE, ip TEXT, public_key TEXT, location INTEGER, last_login TEXT, port TEXT, status TEXT); "
 	sql_create_table_messageData = "CREATE TABLE IF NOT EXISTS messageData (id INTEGER PRIMARY KEY AUTOINCREMENT, senderUPI TEXT, destinationUPI TEXT, time_stamp TEXT, message TEXT, message_type TEXT); "
 	sql_create_table_profile = "CREATE TABLE IF NOT EXISTS userProfile (id INTEGER PRIMARY KEY AUTOINCREMENT, upi TEXT UNIQUE, fullname TEXT, position TEXT, description TEXT, location TEXT, picture TEXT); "
+	sql_create_table_events = "CREATE TABLE IF NOT EXISTS eventData (id INTEGER PRIMARY KEY AUTOINCREMENT, event_id TEXT , host TEXT, guest TEXT, event_name TEXT, start_time TEXT, end_time TEXT, attendance INTEGER, event_desc TEXT, event_loc TEXT); "
 	conn = connectDatabase()
 	c = conn.cursor()
 	try:
 		c.execute(sql_create_table_usersRegisters)
 		c.execute(sql_create_table_messageData)
 		c.execute(sql_create_table_profile)
+		c.execute(sql_create_table_events)
 		conn.commit()
 	except Error as e:
 		print "Error in Database Execution - " + str(e)
@@ -306,6 +309,83 @@ def getProfile(user):
 		print "Error - " + e
 		conn.close()
 		return 0
+
+
+def addEvent(eventDict, host):
+	conn = connectDatabase()
+	c = conn.cursor()
+	eventID = hashlib.sha256(eventDict['event_name'] + str(eventDict['start_time'])).hexdigest()
+	try:
+		sql_insert_event = 'INSERT INTO eventData(event_id, host, guest, event_name, start_time, end_time, attendance, event_desc, event_loc) VALUES(:event_id, :host, :guest, :name, :start, :end, :attend, :desc, :loc)'
+		c.execute(sql_insert_event, {	"event_id":eventID, 
+										"host":host, 
+										"guest":eventDict['guest'], 
+										"name":eventDict['event_name'], 
+										"start":eventDict['start_time'], 
+										"end":eventDict['end_time'], 
+										"attend":eventDict['attendance'], 
+										"desc":eventDict['event_desc'], 
+										"loc":eventDict['event_loc']})
+		conn.commit()
+		conn.close()
+	except Error as e:
+		print str(e)
+	conn.close()
+	return 0
+
+
+def updateEvent(acknow):
+	conn = connectDatabase()
+	c = conn.cursor()
+	eventID = hashlib.sha256(acknow['event_name'] + str(acknow['start_time'])).hexdigest()
+	try:
+		sql_update_event = 'UPDATE eventData SET attendance = :attend WHERE event_id==:id AND guest==:sender'
+		c.execute(sql_update_event, {"attend":acknow['attendance'], "id":eventID, "sender":acknow['sender']})
+		conn.commit()
+		conn.close()
+	except Exception as e:
+		print str(e)
+		return 1
+	conn.close()
+	return 0
+
+
+def gatherEvents(currentUser):
+	conn = connectDatabase()
+	conn.row_factory = sqlite3.Row
+	c = conn.cursor()
+	epoch = time.time()
+	try:
+		# Get all distinct events with people
+		sql_select_events = 'SELECT * FROM eventData WHERE (start_time >= :currTime OR end_time >= :currTime) AND host!=:user'
+		c.execute(sql_select_events, {"currTime":epoch, "user":currentUser})
+		eventList = c.fetchall()
+		conn.close()
+		return eventList
+	except Exception as e:
+		print str(e)
+		return 1
+
+
+def updateAttendance(attendance, row_id):
+	conn = connectDatabase()
+	c = conn.cursor()
+	try:
+		sql_update_event = 'UPDATE eventData SET attendance = :attend WHERE id==:rowid '
+		c.execute(sql_update_event, {"attend":attendance, "rowid":row_id})
+		conn.commit()
+		print "here"
+		try:
+			conn.row_factory = sqlite3.Row
+			sql_select_event = 'SELECT host FROM eventData WHERE id==:rowid'
+			c.execute(sql_select_event, {"rowid":row_id})
+			host = c.fetchone()
+			return host
+		except Exception as e:
+			print str(e)
+	except Exception as e:
+		print str(e)
+	return 0
 
 
 # Connect to the database, returns the connection object
