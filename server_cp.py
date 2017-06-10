@@ -420,14 +420,18 @@ class MainApp(object):
 
 
 	@cherrypy.expose()
-	def getEvents(self):
+	def getEvents(self, toggle):
 		# Get the events from the database
-		eventList = databaseFunctions.gatherEvents(cherrypy.session['username'])
-		print eventList
+		if toggle == "0":
+			eventList = databaseFunctions.gatherEvents(cherrypy.session['username'], 0)
+		else:
+			eventList = databaseFunctions.gatherEvents(cherrypy.session['username'], 1)
 		if eventList is not 1:
 			dic = []
 			for item in eventList:
-				dic.append({"host": item[2], "guest": item[3], "event_name": item[4], "description": item[8], "location": item[9], "end_time": item[6], "start_time": item[5], "id":item[0], "attendance":item[7]})
+				end_time = time.strftime('%d-%m-%Y %H:%M:%S', time.localtime(float(item[6])))
+				start_time = time.strftime('%d-%m-%Y %H:%M:%S', time.localtime(float(item[5])))
+				dic.append({"host": item[2], "guest": item[3], "event_name": item[4], "description": item[8], "location": item[9], "end_time": end_time, "start_time": start_time, "id":item[0], "attendance":item[7]})
 		else:
 			dic = {"Event":"None"}
 		return json.dumps(dic)
@@ -436,9 +440,18 @@ class MainApp(object):
 	@cherrypy.expose()
 	def acknowledgeHost(self, attendance, row_id):
 		# Update the attendance
-		host = databaseFunctions.updateAttendance(attendance, row_id)
-		print host
-		#dataIP = databaseFunctions.getIP(host['host'])
+		try:
+			host = databaseFunctions.updateAttendance(attendance, row_id)
+			dataIP = databaseFunctions.getIP(host[0])
+			jsonDump = {"sender":cherrypy.session['username'], "event_name":host[1], "attendance":attendance, "start_time":host[2]}
+			result = externalComm.reqAcknowledge(jsonDump, dataIP['ip'], dataIP['port'])
+			if result == 0:
+				print "--- Acknowledgement sent ---"
+			else:
+				print result
+		except Exception as e:
+			print str(e)
+			print "Acknowledgement did not send properly"
 
 	# =================
 	# Private functions

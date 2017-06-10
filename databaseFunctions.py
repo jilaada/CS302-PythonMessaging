@@ -350,15 +350,19 @@ def updateEvent(acknow):
 	return 0
 
 
-def gatherEvents(currentUser):
+def gatherEvents(currentUser, toggle):
 	conn = connectDatabase()
 	conn.row_factory = sqlite3.Row
 	c = conn.cursor()
 	epoch = time.time()
 	try:
 		# Get all distinct events with people
-		sql_select_events = 'SELECT * FROM eventData WHERE (start_time >= :currTime OR end_time >= :currTime) AND host!=:user'
-		c.execute(sql_select_events, {"currTime":epoch, "user":currentUser})
+		if toggle == 0:
+			sql_select_events = 'SELECT * FROM eventData WHERE (start_time >= :currTime OR end_time >= :currTime) AND host!=:user'
+			c.execute(sql_select_events, {"currTime":epoch, "user":currentUser})
+		else:
+			sql_select_events = 'SELECT * FROM eventData WHERE (start_time >= :currTime OR end_time >= :currTime) AND host==:user'
+			c.execute(sql_select_events, {"currTime":epoch, "user":currentUser})
 		eventList = c.fetchall()
 		conn.close()
 		return eventList
@@ -377,7 +381,7 @@ def updateAttendance(attendance, row_id):
 		print "here"
 		try:
 			conn.row_factory = sqlite3.Row
-			sql_select_event = 'SELECT host FROM eventData WHERE id==:rowid'
+			sql_select_event = 'SELECT host, event_name, start_time FROM eventData WHERE id==:rowid'
 			c.execute(sql_select_event, {"rowid":row_id})
 			host = c.fetchone()
 			return host

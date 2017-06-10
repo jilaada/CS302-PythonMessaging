@@ -83,7 +83,7 @@ def createViewMessage(messages, currentUser):
 					elif messagetype[0] == "video":
 						div += '<div class="message-box-dest" name=' + items['time_stamp'] + '>' + items['senderUPI'] + ': <video width="auto" height="auto" controls><source src="public/downloads/' + items['message'] + '"></source></video></div>'
 					elif messagetype[0] == "image":
-						div += '<div class="message-box-dest" name=' + items['time_stamp'] + '>' + items['senderUPI'] + ': <img src="public/downloads/' + items['message'] + '" style="width:90%;height:90%;"></img></div>'
+						div += '<div class="message-box-dest" name=' + items['time_stamp'] + '>' + items['senderUPI'] + ': <img src="public/downloads/' + items['message'] + '" style="width:auto;height:auto;"></img></div>'
 					elif messagetype[0] == "application":
 						div += '<div class="message-box-dest" name=' + items['time_stamp'] + '>' + items['senderUPI'] + ': <a href="public/downloads/' + items['message'] + '" >' + items['message'] + '</a></div>'
 					else:

@@ -127,11 +127,12 @@ label {
 }
 
 .profile {
-	margin: 53px 20% 0px 20%;
+	margin: 0 0 0 20%;
 	padding: 15px;
-	height: auto;
+	height: calc(100% - 84px);
     text-align: center;
     background-color: white;
+    overflow-y: auto;
 }
 
 /* Center the avatar image inside this container */
@@ -286,9 +287,18 @@ textarea {
 }
 
 .desc {
+	padding: 0 10px;
 	font: 300 14px/22px "Myriad Set Pro", sans-serif;
 }
 
 #status {
-	font: 300 16px/24px "Myriad Set Pro", sans-serif;
+	font: 300 18px/26px "Myriad Set Pro", sans-serif;
+}
+
+.event-crate {
+	margin: 0;
+    width: 95%;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
 }

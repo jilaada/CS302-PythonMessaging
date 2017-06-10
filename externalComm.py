@@ -198,7 +198,7 @@ def reqEvent(eventDump, ip, port):
 def reqAcknowledge(attendanceDump, ip, port):
 	try:
 		dest = "http://" + ip + ":" + port + "/acknowledgeEvent?"
-		jsonDump = jsondumps(attendanceDump)
+		jsonDump = json.dumps(attendanceDump)
 		try:
 			req = urllib2.Request(dest, jsonDump, {'Content-Type':'application/json'})
 			response = urllib2.urlopen(req, timeout=0.2)

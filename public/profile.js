@@ -65,31 +65,53 @@ function editEvent() {
 
 function viewEvent() {
 	var message_request;
-	message_request = "/getEvents";
+	message_request = '/getEvents?toggle=0';
 	$.get(message_request, function(eventList) {
 		events = JSON.parse(eventList)
-		replaceText = '<div class="upcoming-event">Upcoming events</div><ul class="event-header">'
+		replaceText = '<div class="event-crate"><div class="upcoming-event">Upcoming events</div>'
 		for (var item in events) {
-			alert
-			replaceText += 	'<ul><li style="width:100%">' + events[item]['event_name'] + '</li> \
+			replaceText += 	'<ul class="event-header"><li style="width:100%">' + events[item]['event_name'] + '</li> \
 							<li class="desc">Host: ' + events[item]['host'] + '</li> \
 							<li class="desc">Location: ' + events[item]['location'] + '</li> \
 							<li class="desc">Start Time: ' + events[item]['start_time'] + '</li> \
 							<li class="desc">End Time: ' + events[item]['end_time'] + '</li> \
 							<li class="desc">Description: ' + events[item]['description'] + '</li> \
-							<li class="desc">Acknowledge: </li> \
-							<select class="status" id="' + events[item]['id'] + '" onChange="setEvent(this.value, ' + events[item]['id'] + ')" >'
-			if (events[item]['attendance'] == 2) {
-				replaceText += '<option value="2" selected>Going</option><option value="1">Maybe</option><option value="0">Not Going</option></select></ul>'
-			} else if (events[item]['attendance'] == 1) {
-				replaceText += '<option value="2" >Going</option><option value="1" selected>Maybe</option><option value="0">Not Going</option></select></ul>'
+							<li class="desc">Status:  \
+							<select id="' + events[item]['id'] + '" onChange="setEvent(this.value, ' + events[item]['id'] + ')" >'
+			if (events[item]['attendance'] == 1) {
+				replaceText += '<option value="1" selected>Going</option><option value="2">Maybe</option><option value="0">Not Going</option></select></li></ul>'
+			} else if (events[item]['attendance'] == 2) {
+				replaceText += '<option value="1" >Going</option><option value="2" selected>Maybe</option><option value="0">Not Going</option></select></li></ul>'
 			} else {
-				replaceText += '<option value="2" >Going</option><option value="1" >Maybe</option><option value="0" selected>Not Going</option></select></ul>'
+				replaceText += '<option value="1" >Going</option><option value="2" >Maybe</option><option value="0" selected>Not Going</option></select></li></ul>'
 			}
-		} 
-		$(".profile").html(replaceText)
+		}
 	});
 	
+	message_request = '/getEvents?toggle=1';
+	$.get(message_request, function(eventList) {
+		events = JSON.parse(eventList)
+		replaceText += '<div class="upcoming-event">My Events</div>'
+		for (var item in events) {
+			replaceText += 	'<ul class="event-header"><li style="width:100%">' + events[item]['event_name'] + '</li> \
+							<li class="desc">Host: ' + events[item]['guest'] + '</li> \
+							<li class="desc">Location: ' + events[item]['location'] + '</li> \
+							<li class="desc">Start Time: ' + events[item]['start_time'] + '</li> \
+							<li class="desc">End Time: ' + events[item]['end_time'] + '</li> \
+							<li class="desc">Description: ' + events[item]['description'] + '</li>'
+			if (events[item]['attendance'] == 1) {
+				replaceText += '<li class="desc">Status: Going </li></ul>'
+			} else if (events[item]['attendance'] == 2) {
+				replaceText += '<li class="desc">Status: Maybe </li></ul>'
+			} else {
+				replaceText += '<li class="desc">Status: Not Going </li></ul>'
+			}
+		}
+	});
+	
+	replaceText += '</div>'
+	
+	$(".profile").html(replaceText)
 }
 
 function setEvent(value, id) {
