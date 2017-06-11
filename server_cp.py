@@ -139,10 +139,6 @@ class MainApp(object):
 	@cherrypy.tools.json_in()
 	def receiveMessage(self):
 		inputMessage = cherrypy.request.json
-		try:
-			currentUser = self.getSessionUser()
-		except Error as e:
-			print e
 		databaseFunctions.insertMessage(inputMessage)
 		return "0"
 

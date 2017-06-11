@@ -184,8 +184,8 @@ textarea {
 
 .messages {
     margin: 0;
-	padding: 0 1%;
-    height: 85%;
+	padding: 1% 1%;
+    height: 83.5%;
     width: auto;
     overflow: auto;
     background-color: white;
@@ -301,4 +301,13 @@ textarea {
     background-color: white;
     display: flex;
     flex-direction: column;
+}
+
+.images {
+	max-width: 100%;
+}
+
+span {
+	opacity: 0.5;
+	font: 300 10px/18px "Myriad Set Pro", sans-serif;
 }

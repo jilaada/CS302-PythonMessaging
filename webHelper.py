@@ -63,31 +63,36 @@ def createViewMessage(messages, currentUser):
 			except TypeError as e:
 				messagetype = "unknownType"
 			try:
+				send_time = time.strftime('%d-%m-%Y %H:%M:%S', time.localtime(float(items['time_stamp'])))
 				if items['senderUPI'] == currentUser:
 					# Div for my messages displayed
 					print messagetype[1]
-					if messagetype[0] == "text":
-						div += '<div class="message-box-user" name=' + items['time_stamp'] + '>' + items['senderUPI'] + ': ' + items['message'] + '</div>'
+					if messagetype[0] == "text" and messagetype[1] == "plain":
+						div += '<span style="text-align:right;">' + send_time + '</span><div class="message-box-user" name="' + send_time + '">' + items['senderUPI'] + ': ' + items['message'] + '</div>'
 					elif messagetype[0] == "video":
-						div += '<div class="message-box-user" name=' + items['time_stamp'] + '>' + items['senderUPI'] + ': <video width="auto" height="auto" controls><source src="public/downloads/' + items['message'] + '"></source></video></div>'
+						div += '<span style="text-align:right;">' + send_time + '</span><div class="message-box-user" name="' + send_time + '">' + items['senderUPI'] + ': <video controls><source src="public/downloads/' + items['message'] + '"></source></video></div>'
 					elif messagetype[0] == "image":
-						div += '<div class="message-box-user" name=' + items['time_stamp'] + '>' + items['senderUPI'] + ': <img src="public/downloads/' + items['message'] + '" style="width:auto;height:auto;"></img></div>'
-					elif messagetype[0] == "application":
-						div += '<div class="message-box-user" name=' + items['time_stamp'] + '>' + items['senderUPI'] + ': <a href="public/downloads/' + items['message'] + '" >' + items['message'] + '</a></div>'
+						div += '<span style="text-align:right;">' + send_time + '</span><div class="message-box-user" name="' + send_time + '">' + items['senderUPI'] + ': <img class="images" src="public/downloads/' + items['message'] + '"></img></div>'
+					elif messagetype[0] == "application" or messagetype[0] == "text":
+						div += '<span style="text-align:right;">' + send_time + '</span><div class="message-box-user" name="' + send_time + '">' + items['senderUPI'] + ': <a download href="public/downloads/' + items['message'] + '" >' + items['message'] + '</a></div>'
+					elif messagetype[0] == "audio":
+						div += '<span style="text-align:right;">' + send_time + '</span><div class="message-box-user" name="' + send_time + '">' + items['senderUPI'] + ': <audio src="public/downloads/' + items['message'] + '" controls>' + items['message'] + '</audio></div>'
 					else:
-						div += '<div class="message-box-user" name=' + items['time_stamp'] + '>' + items['senderUPI'] + ': ' + items['message'] + '</div>'
+						div += '<span style="text-align:right;">' + send_time + '</span><div class="message-box-user" name="' + send_time + '">' + items['senderUPI'] + ': ' + items['message'] + '</div>'
 				else:
 					# Div for guest messages
-					if messagetype[0] == "text":
-						div += '<div class="message-box-dest" name=' + items['time_stamp'] + '>' + items['senderUPI'] + ': ' + items['message'] + '</div>'
+					if messagetype[0] == "text" and messagetype[1] == "plain":
+						div += '<span style="text-align:left;">' + send_time + '</span><div class="message-box-dest" name="' + send_time + '">' + items['senderUPI'] + ': ' + items['message'] + '</div>'
 					elif messagetype[0] == "video":
-						div += '<div class="message-box-dest" name=' + items['time_stamp'] + '>' + items['senderUPI'] + ': <video width="auto" height="auto" controls><source src="public/downloads/' + items['message'] + '"></source></video></div>'
+						div += '<span style="text-align:left;">' + send_time + '</span><div class="message-box-dest" name="' + send_time + '">' + items['senderUPI'] + ': <video controls><source src="public/downloads/' + items['message'] + '"></source></video></div>'
 					elif messagetype[0] == "image":
-						div += '<div class="message-box-dest" name=' + items['time_stamp'] + '>' + items['senderUPI'] + ': <img src="public/downloads/' + items['message'] + '" style="width:auto;height:auto;"></img></div>'
-					elif messagetype[0] == "application":
-						div += '<div class="message-box-dest" name=' + items['time_stamp'] + '>' + items['senderUPI'] + ': <a href="public/downloads/' + items['message'] + '" >' + items['message'] + '</a></div>'
+						div += '<span style="text-align:right;">' + send_time + '</span><div class="message-box-dest" name="' + send_time + '">' + items['senderUPI'] + ': <img class="images" src="public/downloads/' + items['message'] + '"></img></div>'
+					elif messagetype[0] == "application" or messagetype[0] == "text":
+						div += '<span style="text-align:right;">' + send_time + '</span><div class="message-box-dest" name="' + send_time + '">' + items['senderUPI'] + ': <a download href="public/downloads/' + items['message'] + '" >' + items['message'] + '</a></div>'
+					elif messagetype[0] == "audio":
+						div += '<span style="text-align:right;">' + send_time + '</span><div class="message-box-dest" name="' + send_time + '">' + items['senderUPI'] + ': <audio href="public/downloads/' + items['message'] + '" >' + items['message'] + '</audio></div>'
 					else:
-						div += '<div class="message-box-dest" name=' + items['time_stamp'] + '>' + items['senderUPI'] + ': ' + items['message'] + '</div>'
+						div += '<span style="text-align:right;">' + send_time + '</span><div class="message-box-dest" name="' + send_time + '">' + items['senderUPI'] + ': ' + items['message'] + '</div>'
 			except Error as e:
 				print e
 		return div

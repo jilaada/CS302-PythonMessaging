@@ -4,15 +4,6 @@ var activeUser
 function displayMessages(user) {
 	$('.name-bar').html('');
 	$(".name-bar").append(user);
-	
-	//if (activeUser == undefined) {
-		//document.getElementById("Home").style.backgroundColor = "initial";
-		//document.getElementById(user).style.backgroundColor = "#4CAF50";
-		//alert("here")
-	//} else {
-		//document.getElementById(activeUser).style.backgroundColor = "initial";
-		//document.getElementById(user).style.backgroundColor = "#4CAF50";
-	//}
 
 	activeUser = user
 	var message_request;
@@ -44,19 +35,25 @@ $('input[type=file]').change(function(){
  
 			success: function(data){
 				//upload successful
-				alert("File Upload Failed");
+				alert("File Upload Success!");
 				console.log("Logged File Sent");
 			},
  
 			error: function(error){
 				//upload failed 
-				alert("File Upload Failed");
+				alert("File Upload Failed!");
 			}
  
 		});
 		
 		refreshMessages(activeUser)
 	});
+
+
+$(".message-box-user").click(function(){
+    $("span").fadeIn();
+});
+
 
 
 function refreshUsers() {
