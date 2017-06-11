@@ -57,8 +57,10 @@ class MainApp(object):
 	def __init__(self):
 		cherrypy.engine.subscribe('stop',self.shutdownActions)
 
-	# This function will allow the application signout all users in the database that are logged in
 	def shutdownActions(self):
+		'''
+		This function will allow the application signout all users in the database that are logged in
+		'''
 		print "----------------------------------"
 		print "ENGINE SHUTTING OFF - AUTO LOG-OFF"
 		print "----------------------------------"
@@ -75,17 +77,23 @@ class MainApp(object):
 	# Webpage Nav Functions
 	# ==================================================================
 
-	# Default function call if an address does not exist
 	@cherrypy.expose
 	def default(self, *args, **kwargs):
+		'''
+		Default function call if an address does not exist
+		'''
 		Page = "The page you are requesting does not exist: <a href='/' >click here</a>"
 		cherrypy.response.status = 404
 		return Page
 
 
-	# The main web page for the website. The user is directed here when they first open the browser
 	@cherrypy.expose
 	def index(self):
+		'''
+		The main web page for the website. The user is directed here when they first open the browser
+		
+		:return redirect to a webpage
+		'''
 		# Try connect to the database if it doesn't exist
 		# Create tables if they don't exist
 		# Get all the users and add to register
@@ -112,9 +120,16 @@ class MainApp(object):
 		return Page
 
 
-	# Function that is called when the user submits the form for signing in
 	@cherrypy.expose
 	def signin(self, username=None, password=None, location=None):
+		'''
+		Function that is called when the user submits the form for signing in
+		
+		:param username of the user
+		:param password of the user
+		:param location of the user
+		:return redirect to a webpage
+		'''
 		# Check their name and password and send them either to the main page, or back to the main login screen
 		error = self.authoriseUserLogin(username, password, location)
 		if error == 0:
@@ -123,20 +138,29 @@ class MainApp(object):
 			raise cherrypy.HTTPRedirect('/login')
 
 
-	# The main web page for the website. The user is directed here when they are authenticated
-	# Displays the navigation pane as well as their profile
 	@cherrypy.expose
 	def login(self):
+		'''
+		The main web page for the website. The user is directed here when they are authenticated
+		Displays the navigation pane as well as their profile
+		
+		:return redirect to the main login for the webpage
+		'''
 		f = open("public/index.html")
 		Page = f.read()
 		f.close()
 		return Page
 
 
-	# Function to called when the user clicks to signout
-	# Removes all credentials from the session and reports the user as offline on the login server
+
 	@cherrypy.expose
 	def signout(self):
+		'''
+		Function to called when the user clicks to signout
+		Removes all credentials from the session and reports the user as offline on the login server
+		
+		:return redirect to a the main log in page for the webpage
+		'''
 		# Log the current user out, expires their session when the user presses the log out button on the website
 		print "-------------------------"
 		print "SIGNING OUT OF THE SERVER"
@@ -162,38 +186,125 @@ class MainApp(object):
 
 
 	@cherrypy.expose
-	@cherrypy.tools.json_in()
-	def receiveMessage(self):
-		inputMessage = cherrypy.request.json
-		databaseFunctions.insertMessage(inputMessage)
-		return "0"
-
-
-	@cherrypy.expose
 	def messageWrite(self):
+		'''
+		Creates the message display and writing interface
+		
+		:return return the main page or the redirects to the login page
+		'''
 		try:
+			# Uses sessions to verify user authentication
 			Page = webHelper.createMessages(cherrypy.session['username'], cherrypy.session['password'])
 		except KeyError as e:
 			raise cherrypy.HTTPRedirect('/')
 		return Page
 
 
+	@cherrypy.expose()
+	def editProfile(self):
+		'''
+		Creates the edit profile page
+		
+		:return return the main profile page or the redirects to the login page
+		'''
+		try:
+			Page = webHelper.createEditProfile(cherrypy.session['username'])
+		except KeyError as e:
+			print "Error - no session"
+			raise cherrypy.HTTPRedirect('/')
+		return Page
+
+
+	# ==================================================================
+	# External Call Functions
+	# ==================================================================
+
+
+	@cherrypy.expose
+	@cherrypy.tools.json_in()
+	def receiveMessage(self):
+		'''
+		Called by the clients request to send this client a message
+		should return an error code - how returns only "0"
+		
+		:param input message from the other client as a json object
+		:return returns an error code deduced from the storing of the message
+		'''
+		inputMessage = cherrypy.request.json
+		data = databaseFunctions.insertMessage(inputMessage)
+		return data
+
+
 	@cherrypy.expose
 	@cherrypy.tools.json_in()
 	def receiveFile(self):
+		'''
+		Called by the clients requesting that a file be sent to this client
+		
+		:param input file from the other client as a json object
+		:return returns an error code deduced from the storing of the message
+		'''
 		inputFile = cherrypy.request.json
-		# Leaving data out of my database that isn't meant for me
-		try:
-			currentUser = self.getSessionUser()
-		except Error as e:
-			print e
 		internalComm.saveFile(inputFile)
-		databaseFunctions.storeFile(inputFile)
-		return "0"
+		data = databaseFunctions.storeFile(inputFile)
+		return data
 
 
 	@cherrypy.expose
+	@cherrypy.tools.json_in()
+	def getProfile(self):
+		'''
+		Other users will call get profile to get user's profile data
+		
+		:param input file from the other client as a json object include the sender and the upi of the use they are after
+		:return returns the profile of the user as a json object
+		'''
+		inputMessage = cherrypy.request.json
+		try:
+			user = inputMessage["profile_username"]
+		except (KeyError, TypeError) as e:
+			print str(e)
+			return "1"
+		profileData = databaseFunctions.getProfile(user)
+		encryption = int(0)
+		output_dict = {"fullname":profileData['fullname'], "position":profileData['position'], "description":profileData['description'], "location":profileData['location'], "picture":profileData['picture'], "encryption":encryption}
+		return json.dumps(output_dict)
+
+
+	@cherrypy.expose()
+	def listAPI(self):
+		'''
+		Allows other users to see the available API calls for tjhis client
+		
+		:return returns a string with formatted list of apis available to use
+		'''
+		output_dict = "/<receiveMessage>[sender][destination][message][stamp]\n/<getProfile>[profile_username]\n/<ping>[sender]\n/<receiveFile>[sender][destination][file]\nEncryption 0\nHashing 0"
+		return output_dict
+
+
+	@cherrypy.expose()
+	def ping(self, sender=None):
+		'''
+		Pings the user and reutrn a 0 string - update teh sever with the new user's current time
+		
+		:return returns "0"
+		'''
+		databaseFunctions.pingRefresh(sender)
+		return "0"
+
+
+
+	# ==================================================================
+	# Internal to External Call Functions
+	# ==================================================================
+
+	@cherrypy.expose
 	def sendFile(self, dataFile=None):
+		'''
+		Call send file to send a file to another client who is online
+		
+		:return returns the file to be sent to other users
+		'''
 		global activeUser
 		sender = cherrypy.session['username']
 		destination = activeUser
@@ -201,11 +312,13 @@ class MainApp(object):
 		hashing = int(0)
 		size = 0
 		try:
+			# encode the data
 			data = dataFile.file.read()
 			base64data = base64.encodestring(data)
 			output_dict = {"sender":sender, "destination":destination, "file":base64data, "filename":(dataFile.filename), "content_type":str(dataFile.content_type), "stamp":epoch_time, "hashing":hashing}
 			out_json = json.dumps(output_dict)
 			try:
+				# Get the user parameters
 				ipdata = databaseFunctions.getIP(destination)
 				send = externalComm.sendFile(out_json, ipdata["ip"], ipdata["port"])
 				databaseFunctions.storeFile(output_dict)
@@ -225,29 +338,18 @@ class MainApp(object):
 		pass
 
 
-	@cherrypy.expose
-	@cherrypy.tools.json_in()
-	def getProfile(self):
-		inputMessage = cherrypy.request.json
-		user = inputMessage["profile_username"]
-		profileData = databaseFunctions.getProfile(user)
-		encryption = int(0)
-		output_dict = {"fullname":profileData['fullname'], "position":profileData['position'], "description":profileData['description'], "location":profileData['location'], "picture":profileData['picture'], "encryption":encryption}
-		return json.dumps(output_dict)
-		pass
 
-
-	@cherrypy.expose()
-	def editProfile(self):
-		try:
-			Page = webHelper.createEditProfile(cherrypy.session['username'])
-		except KeyError as e:
-			print "Error - no session"
-			raise cherrypy.HTTPRedirect('/')
-		return Page
-
+	# ==================================================================
+	# Internal Call Functions
+	# ==================================================================
 
 	def sendText(self, message):
+		'''
+		This function is called to send a message to the clients
+		
+		:return returns the file to be sent to other users
+		'''
+		#Get sender parameters
 		destination = activeUser
 		epoch_time = float(time.time())
 		output_dict = {"sender":cherrypy.session['username'], "destination":destination, "message":message, "stamp":epoch_time}
@@ -273,6 +375,12 @@ class MainApp(object):
 		return "0"
 
 
+
+	# ==================================================================
+	# Exposed for Web Functions
+	# ==================================================================
+
+	# Get the current user's profile from the database
 	@cherrypy.expose()
 	def userProfile(self, user):
 		try:
@@ -293,6 +401,7 @@ class MainApp(object):
 			print "Getting profile failed"
 
 
+	# Allows for the profile form to be sibmitted and save from the website
 	@cherrypy.expose()
 	def saveProfile(self, fullname=None, location=None, position=None, description=None, picture=None):
 		output_dict = {"fullname": fullname, "position": position, "description": description, "location": location, "picture": picture}
@@ -303,6 +412,8 @@ class MainApp(object):
 			print e
 		raise cherrypy.HTTPRedirect('/')
 
+
+	# Allows for the event form to be submitted form the the website
 	@cherrypy.expose()
 	def createEvent(self, guest=None, name=None, start=None, end=None, desc=None, loc=None):
 		pattern = '%d-%m-%Y %H:%M:%S'
@@ -323,22 +434,13 @@ class MainApp(object):
 			print "Sending to guest unsuccessful"
 		raise cherrypy.HTTPRedirect('/')
 
+
+
 	# =================
 	# Other functions
 	# =================
 
-	@cherrypy.expose()
-	def listAPI(self):
-		output_dict = "/<receiveMessage>[sender][destination][message][stamp]\n/<getProfile>[profile_username]\n/<ping>[sender]\n/<receiveFile>[sender][destination][file]\nEncryption 0\nHashing 0"
-		return output_dict
-
-
-	@cherrypy.expose()
-	def ping(self, sender=None):
-		databaseFunctions.pingRefresh(sender)
-		return "0"
-
-
+	# Get the status of the user
 	@cherrypy.expose()
 	@cherrypy.tools.json_in()
 	def getStatus(self):
@@ -351,6 +453,7 @@ class MainApp(object):
 		return jsonDump
 
 
+	# Get messages to be displayed on the screen of the webpage
 	@cherrypy.expose()
 	def getMessages(self, user):
 		messages = databaseFunctions.getMessages(user, cherrypy.session['username'])
@@ -358,6 +461,7 @@ class MainApp(object):
 		return html
 
 
+	# Get the refreshed user list
 	@cherrypy.expose()
 	def refreshUserList(self):
 		html = webHelper.createUserList(cherrypy.session['username'], cherrypy.session['password'])
@@ -365,17 +469,19 @@ class MainApp(object):
 		return html
 
 
+	# Toggle the active user
 	@cherrypy.expose()
 	def toggleActiveUser(self, user):
 		global activeUser
 		activeUser = user
 
-
+	# send teh messages to the user - call from the webservice
 	@cherrypy.expose()
 	def sendMessage(self, message):
 		self.sendText(message)
 		return "0"
 
+	# Get thte profile of the user for the webpage
 	@cherrypy.expose()
 	def getUserProfile(self):
 		try: 
@@ -392,7 +498,7 @@ class MainApp(object):
 			print e
 			return "1, profile not found" 
 
-
+	# Get all the users in the list
 	@cherrypy.expose()
 	def getAllUsers(self):
 		userList = databaseFunctions.getUsers()
@@ -402,6 +508,7 @@ class MainApp(object):
 		return json.dumps(dic)
 
 
+	# Store the status of the users
 	@cherrypy.expose()
 	def storeStatus(self, status):
 		# Save the status in the database
@@ -410,6 +517,7 @@ class MainApp(object):
 		databaseFunctions.storeStatus(jsonDump, cherrypy.session['username'])
 
 
+	# Recevie events from other users
 	@cherrypy.expose()
 	@cherrypy.tools.json_in()
 	def receiveEvent(self):
@@ -429,6 +537,8 @@ class MainApp(object):
 				return "1"
 		return "0"
 
+
+	# Acknowledge the event from otehr users
 	@cherrypy.expose()
 	@cherrypy.tools.json_in()
 	def acknowledgeEvent(self):
@@ -441,6 +551,7 @@ class MainApp(object):
 		return "0"
 
 
+	# get the events to be displayed on the screen
 	@cherrypy.expose()
 	def getEvents(self, toggle):
 		# Get the events from the database
@@ -459,6 +570,7 @@ class MainApp(object):
 		return json.dumps(dic)
 
 
+	# acknowledge the host - an external call from the website
 	@cherrypy.expose()
 	def acknowledgeHost(self, attendance, row_id):
 		# Update the attendance
@@ -479,6 +591,8 @@ class MainApp(object):
 	# Private functions
 	# =================
 
+
+	# Authorise the user logins credentials
 	def authoriseUserLogin(self, username, password, location):
 		# Get hash of password
 		hashpw = hashlib.sha256(password + "COMPSYS302-2017").hexdigest()
@@ -505,10 +619,6 @@ class MainApp(object):
 			cherrypy.session['username'] = None
 			cherrypy.session['location'] = None
 			return 1
-
-	# Get the current session user
-	def getSessionUser(self):
-		return "jecc724"
 
 
 def runMainApp():

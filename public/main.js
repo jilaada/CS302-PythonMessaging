@@ -1,6 +1,7 @@
 // GLOBAL VARIABLES //
 var activeUser
 
+// display the messages on the screen
 function displayMessages(user) {
 	$('.name-bar').html('');
 	$(".name-bar").append(user);
@@ -18,6 +19,8 @@ function displayMessages(user) {
 	});
 }
 
+
+// Clear the text box and clear the messaage 
 $("#send-button").click(function() {
 	sendMessage()
 	refreshMessages(activeUser)
@@ -25,6 +28,7 @@ $("#send-button").click(function() {
 	});
 
 
+// Send the file uppon request
 $('input[type=file]').change(function(){
 		$(this).simpleUpload("/sendFile", {
 
@@ -49,7 +53,7 @@ $('input[type=file]').change(function(){
 		refreshMessages(activeUser)
 	});
 
-
+//Search the users
 function searchFunction() {
     // Declare variables
     var input, filter, ul, li, a, i;
@@ -69,6 +73,7 @@ function searchFunction() {
     }
 }
 
+// Refresh the user list
 function refreshUsers() {
 	var message_request;
 	message_request = "/refreshUserList";
@@ -80,7 +85,7 @@ function refreshUsers() {
 	}, 25000);
 }
 
-
+// Send the message to teh user
 function sendMessage() {
 	var message_request;
 	//Get the messages from the database somehow
@@ -92,6 +97,8 @@ function sendMessage() {
 	}
 }
 
+
+// Get the current status of the user
 function getStatus() {
 	var state
 	state = document.getElementById('status').value;
@@ -104,6 +111,7 @@ function getStatus() {
 	}, 20000);
 }
 
+// refresh all the messages
 function refreshMessages(user) {
     var message_request;
     message_request = "/getMessages?user=" + user;
@@ -112,7 +120,7 @@ function refreshMessages(user) {
 	});
 }
 
-
+// Send message on enter hit
 document.getElementById("clear").addEventListener("keydown", function(e) {
 	if (e.keyCode == 13) { 
 		sendMessage();
@@ -121,7 +129,7 @@ document.getElementById("clear").addEventListener("keydown", function(e) {
 	}
 }, false);
 
-
+// At document ready do this:
 $(document).ready(function() {
 	// Starting
 	refreshUsers()

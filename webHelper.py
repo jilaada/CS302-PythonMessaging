@@ -99,7 +99,7 @@ def createViewMessage(messages, currentUser):
 		print e
 	return 0
 
-
+# Creates the user list for display of all the active user
 def createUserList(user, pw):
 	try:
 		userList = externalComm.autoGetList(user, pw).read()

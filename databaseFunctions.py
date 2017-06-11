@@ -61,6 +61,7 @@ def addUser(user):
 	conn.close()
 	pass
 
+# Function that will update the people logged onto the client
 def updateLogged(user, pw):
 	conn = connectDatabase()
 	c = conn.cursor()
@@ -74,7 +75,7 @@ def updateLogged(user, pw):
 		print str(e)
 		conn.close()
 
-
+# Get the logged users on this client
 def getLogged():
 	conn = connectDatabase()
 	conn.row_factory = sqlite3.Row
@@ -96,7 +97,7 @@ def getLogged():
 		print str(e)
 		return None
 
-
+# Get the users from the register
 def getUsers():
 	sql_select_message = 'SELECT upi FROM userRegister'
 	conn = connectDatabase()
@@ -133,6 +134,7 @@ def refreshDatabase(onlineUsers):
 				conn.close()
 	return dic
 
+# Refreshes the database with the new user's current time
 def pingRefresh(sender):
 	conn = connectDatabase()
 	c = conn.cursor()
@@ -165,19 +167,18 @@ def insertMessage(messageData):
 			except (KeyError, TypeError) as e:
 				print e
 				conn.close()
-				return 1
+				return "1"
 			except Error as e:
 				print e
 				conn.close()
-				return 4
+				return "4"
 		else:
 			print "Message saved already"
 	except Error as e:
 		print e
-		return 4
+		return "4"
 	conn.close()
-	return 0
-
+	return "0"
 
 # Store the file messages on the database
 def storeFile(fileData):
@@ -194,19 +195,18 @@ def storeFile(fileData):
 			except (KeyError, TypeError) as e:
 				print e
 				conn.close()
-				return 1
+				return "1"
 			except Error as e:
 				print e
 				conn.close()
-				return 4
+				return "4"
 		else:
 			print "Message saved already"
 	except Error as e:
 		print e
-		return 4
+		return "4"
 	conn.close()
-	return 0
-
+	return "0"
 
 # Get the IP from the database
 def getIP(destUPI):
@@ -226,7 +226,6 @@ def getIP(destUPI):
 		print "Error - Not able to print get name"
 		conn.close()
 		return 0
-
 
 # Get all the messages sent to and from a person
 def getMessages(user, clientUser):
@@ -269,7 +268,6 @@ def dropdownGet():
 	conn.close()
 	return 0
 
-
 # Store the profile values into the database
 def storeProfile(profileData, upi):
 	profileData = json.loads(profileData)
@@ -296,8 +294,7 @@ def storeProfile(profileData, upi):
 	conn.close()
 	return 0
 
-
-
+# Store the current user status
 def storeStatus(status_in, user):
 	try:
 		status = json.loads(status_in)
@@ -316,7 +313,7 @@ def storeStatus(status_in, user):
 	except Error as e:
 		print str(e)
 
-
+# Get the status of the user
 def getStatus(user):
 	conn = connectDatabase()
 	conn.row_factory = sqlite3.Row
@@ -329,7 +326,7 @@ def getStatus(user):
 	except Error as e:
 		return "0"
 
-
+# Get the profile of a user
 def getProfile(user):
 	conn = connectDatabase()
 	conn.row_factory = sqlite3.Row
@@ -345,7 +342,7 @@ def getProfile(user):
 		conn.close()
 		return 0
 
-
+# Add an event to the database
 def addEvent(eventDict, host):
 	conn = connectDatabase()
 	c = conn.cursor()
@@ -368,7 +365,7 @@ def addEvent(eventDict, host):
 	conn.close()
 	return 0
 
-
+# Update when the event has been acknowledge by the user
 def updateEvent(acknow):
 	conn = connectDatabase()
 	c = conn.cursor()
@@ -384,7 +381,7 @@ def updateEvent(acknow):
 	conn.close()
 	return 0
 
-
+# Gather all events for display on the screen
 def gatherEvents(currentUser, toggle):
 	conn = connectDatabase()
 	conn.row_factory = sqlite3.Row
@@ -405,7 +402,7 @@ def gatherEvents(currentUser, toggle):
 		print str(e)
 		return 1
 
-
+# Update the attendance of an event when a guest acknowledgegs
 def updateAttendance(attendance, row_id):
 	conn = connectDatabase()
 	c = conn.cursor()
@@ -425,7 +422,6 @@ def updateAttendance(attendance, row_id):
 	except Exception as e:
 		print str(e)
 	return 0
-
 
 # Connect to the database, returns the connection object
 def connectDatabase():

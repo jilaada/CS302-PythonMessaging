@@ -1,3 +1,4 @@
+// function that will update profile website
 function updateWebpageProfile() {
 	var message_request;
 	message_request = "/getUserProfile";
@@ -8,6 +9,7 @@ function updateWebpageProfile() {
 	});
 }
 
+// function that will displaty the edit profile page
 function editProfile() {
 	var message_request;
 	message_request = "/getUserProfile";
@@ -18,7 +20,7 @@ function editProfile() {
 	});
 }
 
-
+// function that displays all the users on the dash and updates the profiles
 function viewProfiles() {
 	var message_request;
 	message_request = "/getAllUsers";
@@ -33,6 +35,8 @@ function viewProfiles() {
 	});
 }
 
+
+// Search function for the user list
 function searchFunction() {
     // Declare variables
     var input, filter, ul, li, a, i;
@@ -53,6 +57,7 @@ function searchFunction() {
 }
 
 
+// display the profile of the current user
 function displayProfile(user) {
 	var message_request;
 	message_request = "/userProfile?user=" + user;
@@ -63,7 +68,7 @@ function displayProfile(user) {
 	});
 }
 
-
+// Get the status of the current user
 function getStatus() {
 	var state
 	state = document.getElementById('status').value;
@@ -76,7 +81,7 @@ function getStatus() {
 	}, 20000);
 }
 
-
+// Display the edit form for the events
 function editEvent() {
 	replaceProfile = 	'<div class="create-event">Create New Event</div>'
 	replaceProfile += 	'<form action="/createEvent" method="post" enctype="multipart/form-data" class="editProfile"> \
@@ -90,7 +95,7 @@ function editEvent() {
 	$(".profile").html(replaceProfile)
 }
 
-
+// View all the events for this 
 function viewEvent() {
 	var message_request;
 	message_request = '/getEvents?toggle=0';
@@ -142,13 +147,14 @@ function viewEvent() {
 	$(".profile").html(replaceText)
 }
 
+// Set an acknowledgement for the event to the user
 function setEvent(value, id) {
 	var message_request;
 	message_request = "/acknowledgeHost?attendance=" + value + "&row_id=" + id;
 	$.get(message_request)
 }
 
-
+// At document ready do this:
 $(document).ready(function() {
 	// Starting
 	updateWebpageProfile()

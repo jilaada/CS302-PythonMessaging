@@ -162,7 +162,7 @@ def reqProfile(jsonDump, ip, port):
 		print str(e)
 	return 0
 
-
+# Request the status of the user
 def reqStatus(username, ip, port):
 	dest = "http://" + ip + ":" + port + "/getStatus?"
 	user = {"profile_username":username}
@@ -181,7 +181,7 @@ def reqStatus(username, ip, port):
 		print str(e)
 	return 0
 
-
+# Request an event from a user
 def reqEvent(eventDump, ip, port):
 	try:
 		dest = "http://" + ip + ":" + port + "/receiveEvent?"
@@ -199,7 +199,7 @@ def reqEvent(eventDump, ip, port):
 	except Exception as e:
 		print str(e)
 
-
+# Request an ackowledgement from teh user
 def reqAcknowledge(attendanceDump, ip, port):
 	try:
 		dest = "http://" + ip + ":" + port + "/acknowledgeEvent?"
