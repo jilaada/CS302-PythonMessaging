@@ -84,9 +84,10 @@ def getLogged():
 		c.execute(sql_select_logged, {"log":1})
 		data = c.fetchall()
 		try:
-			sql_update_logged = 'UPDATE userRegister SET logged==:log, pwd==:pw WHERE upi==:user'
-			c.execute(sql_update_logged, {"log":0, "pw":"0", "user":data[0]['upi']})
-			conn.commit()
+			for item in data:
+				sql_update_logged = 'UPDATE userRegister SET logged==:log, pwd==:pw WHERE upi==:user'
+				c.execute(sql_update_logged, {"log":0, "pw":"0", "user":item['upi']})
+				conn.commit()
 		except Exception as e:
 			print str(e)
 		conn.close()

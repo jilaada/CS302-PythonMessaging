@@ -50,93 +50,9 @@ class MainApp(object):
 				 }
 
 
-	# Function will be called when the user decides to go someone unspecified by the system
-	@cherrypy.expose
-	def default(self, *args, **kwargs):
-		"""The default page, given when we don't recognise where the request is for."""
-		Page = "The page you are requesting does not exist: click here"
-		cherrypy.response.status = 404
-		return Page
-
-
-	# The main web page for the website. The user is directed here when they first open the browser
-	@cherrypy.expose
-	def index(self):
-		try:
-			Page = webHelper.createHomePage(cherrypy.session['username'])
-		except (KeyError, TypeError): #There is no username
-			# WHEN SOMEONE FIRST OPENS THE PAGE AFTER SERVER INITIALISATION GO TO LOG IN PAGE
-			raise cherrypy.HTTPRedirect('/login')
-		# Upon trying to connect to the home page, the server will try to connect to a database
-		# if the database does not exist it will make it and close it
-		try:
-			conn = sqlite3.connect("database.db")
-		except Error as e:
-			print(e)
-		finally:
-			conn.close()
-			cherrypy.session['database'] = "on"
-
-		# This section determines if there is a database
-		if cherrypy.session['database'] is not None:
-			databaseFunctions.createTable()
-			users = externalComm.getAllUsers()
-			databaseFunctions.addRegisteredUsers(users)
-
-		return Page
-
-
-	# The main web page for the website. The user is directed here when they first open the browser
-	@cherrypy.expose
-	def usersOnline(self):
-		users = databaseFunctions.dropdownGet()
-		Page = "Here is a list of all the users online!<br/><br/>"
-		for i in users:
-			Page += i + '<br/>'
-		return Page
-
-
-	#The login page for the server
-	@cherrypy.expose
-	def login(self):
-		f = open("public/index.html")
-		Page = f.read()
-		f.close()
-		return Page
-
-
-	# LOGGING IN AND OUT
-	@cherrypy.expose
-	def signin(self, username=None, password=None, location=None):
-		"""Check their name and password and send them either to the main page, or back to the main login screen."""
-		error = self.authoriseUserLogin(username, password, location)
-		if error == 0:
-			raise cherrypy.HTTPRedirect('/')
-		else:
-			raise cherrypy.HTTPRedirect('/login')
-
-	
-	@cherrypy.expose
-	def signout(self):
-		"""Logs the current user out, expires their session"""
-		print "SIGNING OUT OF THE SERVER"
-		username = cherrypy.session.get('username')
-		password = cherrypy.session.get('password')
-		if username is None:
-			pass
-		else:
-			data = urllib.urlopen('http://cs302.pythonanywhere.com/logoff?username=' + username + '&password=' + password + '&enc=0')
-			externalComm.toggleAuthority(False)
-			dump = {"status":"Offline"}
-			dumps = json.dumps(dump)
-			databaseFunctions.storeStatus(dumps, cherrypy.session['username'])
-			print data.read()
-			cherrypy.lib.sessions.expire()
-			cherrypy.session['username'] = None
-			cherrypy.session['password'] = None
-			cherrypy.session['location'] = None
-		raise cherrypy.HTTPRedirect('/')
-
+	# ==================================================================
+	# CherryPy Server Functions
+	# ==================================================================
 
 	def __init__(self):
 		cherrypy.engine.subscribe('stop',self.shutdownActions)
@@ -149,10 +65,98 @@ class MainApp(object):
 		data = databaseFunctions.getLogged()
 		for item in data:
 			data = urllib.urlopen('http://cs302.pythonanywhere.com/logoff?username=' + item[0] + '&password=' + item[1] + '&enc=0')
-			print data
+			print data.read()
 		print "----------------------------------"
 		print "SHUT DOWN COMPLETE"
 		print "----------------------------------"
+
+
+	# ==================================================================
+	# Webpage Nav Functions
+	# ==================================================================
+
+	# Default function call if an address does not exist
+	@cherrypy.expose
+	def default(self, *args, **kwargs):
+		Page = "The page you are requesting does not exist: <a href='/' >click here</a>"
+		cherrypy.response.status = 404
+		return Page
+
+
+	# The main web page for the website. The user is directed here when they first open the browser
+	@cherrypy.expose
+	def index(self):
+		# Try to create a log in page using valid cherrypy sessions
+		# Raise a key error or a type error and redirect to the login page if the session doesn't exist
+		try:
+			Page = webHelper.createHomePage(cherrypy.session['username'])
+		except (KeyError, TypeError):
+			raise cherrypy.HTTPRedirect('/login')
+		
+		# Try connect to the database if it doesn't exist 
+		# Create tables if they don't exist
+		# Get all the users and add to register
+		try:
+			conn = sqlite3.connect("database.db")
+			databaseFunctions.createTable()
+			users = externalComm.getAllUsers()
+			databaseFunctions.addRegisteredUsers(users)
+		except Exception as e:
+			print(e)
+		finally:
+			conn.close()
+			cherrypy.session['database'] = "on"
+		
+		return Page
+
+
+	# Function that is called when the user submits the form for signing in
+	@cherrypy.expose
+	def signin(self, username=None, password=None, location=None):
+		# Check their name and password and send them either to the main page, or back to the main login screen
+		error = self.authoriseUserLogin(username, password, location)
+		if error == 0:
+			raise cherrypy.HTTPRedirect('/')
+		else:
+			raise cherrypy.HTTPRedirect('/login')
+
+
+	# The main web page for the website. The user is directed here when they are authenticated
+	# Displays the navigation pane as well as their profile
+	@cherrypy.expose
+	def login(self):
+		f = open("public/index.html")
+		Page = f.read()
+		f.close()
+		return Page
+
+
+	# Function to called when the user clicks to signout
+	# Removes all credentials from the session and reports the user as offline on the login server
+	@cherrypy.expose
+	def signout(self):
+		# Log the current user out, expires their session when the user presses the log out button on the website
+		print "-------------------------"
+		print "SIGNING OUT OF THE SERVER"
+		print "-------------------------"
+		username = cherrypy.session.get('username')
+		password = cherrypy.session.get('password')
+		# Signout if credentials exist
+		if username is None:
+			pass
+		else:
+			data = urllib.urlopen('http://cs302.pythonanywhere.com/logoff?username=' + username + '&password=' + password + '&enc=0')
+			print data.read()
+			# Will toggle a release on the thread for reporting
+			externalComm.toggleAuthority(False)
+			# Change the user's status
+			databaseFunctions.storeStatus(json.dumps({"status":"Offline"}), cherrypy.session['username'])
+			# Expire all sessions
+			cherrypy.lib.sessions.expire()
+			cherrypy.session['username'] = None
+			cherrypy.session['password'] = None
+			cherrypy.session['location'] = None
+		raise cherrypy.HTTPRedirect('/')
 
 
 	@cherrypy.expose
