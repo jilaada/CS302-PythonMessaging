@@ -1,0 +1,61 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module externalComm</title>
+<meta charset="utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>externalComm</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/afs/ec.auckland.ac.nz/users/j/e/jecc724/unixhome/Desktop/COMPSYS302-PYTHON/uoa-cs302-2017-jecc724/externalComm.py">/afs/ec.auckland.ac.nz/users/j/e/jecc724/unixhome/Desktop/COMPSYS302-PYTHON/uoa-cs302-2017-jecc724/externalComm.py</a></font></td></tr></table>
+    <p><tt>cherrypy_example.py<br>
+&nbsp;<br>
+COMPSYS302&nbsp;-&nbsp;Software&nbsp;Design<br>
+Author:&nbsp;Jilada&nbsp;Eccleston<br>
+Last&nbsp;Edited:&nbsp;19/02/2015<br>
+&nbsp;<br>
+This&nbsp;program&nbsp;uses&nbsp;the&nbsp;CherryPy&nbsp;web&nbsp;server&nbsp;(from&nbsp;www.cherrypy.org).</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="atexit.html">atexit</a><br>
+<a href="databaseFunctions.html">databaseFunctions</a><br>
+</td><td width="25%" valign=top><a href="json.html">json</a><br>
+<a href="socket.html">socket</a><br>
+</td><td width="25%" valign=top><a href="time.html">time</a><br>
+<a href="urllib.html">urllib</a><br>
+</td><td width="25%" valign=top><a href="urllib2.html">urllib2</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-autoGetList"><strong>autoGetList</strong></a>(user, pw)</dt><dd><tt>#&nbsp;Function&nbsp;that&nbsp;will&nbsp;allow&nbsp;the&nbsp;user&nbsp;to&nbsp;get&nbsp;a&nbsp;list&nbsp;of&nbsp;the&nbsp;current&nbsp;users&nbsp;online&nbsp;and&nbsp;display&nbsp;them&nbsp;in&nbsp;the&nbsp;terminal</tt></dd></dl>
+ <dl><dt><a name="-autoReport"><strong>autoReport</strong></a>(username, password, curLocation)</dt><dd><tt>#&nbsp;Report&nbsp;automatically&nbsp;to&nbsp;the&nbsp;server</tt></dd></dl>
+ <dl><dt><a name="-externReport"><strong>externReport</strong></a>(curUser, curPw, curLocation)</dt><dd><tt>#&nbsp;External&nbsp;report&nbsp;tied&nbsp;to&nbsp;the&nbsp;thread</tt></dd></dl>
+ <dl><dt><a name="-getAllUsers"><strong>getAllUsers</strong></a>()</dt><dd><tt>#&nbsp;Function&nbsp;that&nbsp;will&nbsp;get&nbsp;the&nbsp;complete&nbsp;list&nbsp;of&nbsp;users</tt></dd></dl>
+ <dl><dt><a name="-reqAcknowledge"><strong>reqAcknowledge</strong></a>(attendanceDump, ip, port)</dt><dd><tt>#&nbsp;Request&nbsp;an&nbsp;ackowledgement&nbsp;from&nbsp;teh&nbsp;user</tt></dd></dl>
+ <dl><dt><a name="-reqEvent"><strong>reqEvent</strong></a>(eventDump, ip, port)</dt><dd><tt>#&nbsp;Request&nbsp;an&nbsp;event&nbsp;from&nbsp;a&nbsp;user</tt></dd></dl>
+ <dl><dt><a name="-reqProfile"><strong>reqProfile</strong></a>(jsonDump, ip, port)</dt><dd><tt>#&nbsp;Send&nbsp;a&nbsp;requestion&nbsp;x&nbsp;address&nbsp;getting&nbsp;their&nbsp;profile</tt></dd></dl>
+ <dl><dt><a name="-reqStatus"><strong>reqStatus</strong></a>(username, ip, port)</dt><dd><tt>#&nbsp;Request&nbsp;the&nbsp;status&nbsp;of&nbsp;the&nbsp;user</tt></dd></dl>
+ <dl><dt><a name="-send"><strong>send</strong></a>(jsonDump, ip, port)</dt><dd><tt>#&nbsp;Send&nbsp;the&nbsp;message&nbsp;data&nbsp;to&nbsp;the&nbsp;users</tt></dd></dl>
+ <dl><dt><a name="-sendFile"><strong>sendFile</strong></a>(jsonDump, ip, port)</dt><dd><tt>#&nbsp;Send&nbsp;the&nbsp;message&nbsp;data&nbsp;to&nbsp;the&nbsp;users</tt></dd></dl>
+ <dl><dt><a name="-toggleAuthority"><strong>toggleAuthority</strong></a>(setToggle)</dt><dd><tt>#&nbsp;Toggle&nbsp;whether&nbsp;or&nbsp;not&nbsp;the&nbsp;function&nbsp;thread&nbsp;should&nbsp;report&nbsp;the&nbsp;credentials</tt></dd></dl>
+ <dl><dt><a name="-usersOnline"><strong>usersOnline</strong></a>(user, pw)</dt><dd><tt>#&nbsp;Get&nbsp;the&nbsp;users&nbsp;who&nbsp;are&nbsp;online</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>toggleThread</strong> = False</td></tr></table>
+</body></html>

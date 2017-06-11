@@ -1,0 +1,63 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module databaseFunctions</title>
+<meta charset="utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>databaseFunctions</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/afs/ec.auckland.ac.nz/users/j/e/jecc724/unixhome/Desktop/COMPSYS302-PYTHON/uoa-cs302-2017-jecc724/databaseFunctions.py">/afs/ec.auckland.ac.nz/users/j/e/jecc724/unixhome/Desktop/COMPSYS302-PYTHON/uoa-cs302-2017-jecc724/databaseFunctions.py</a></font></td></tr></table>
+    <p><tt>cherrypy_example.py<br>
+&nbsp;<br>
+COMPSYS302&nbsp;-&nbsp;Software&nbsp;Design<br>
+Author:&nbsp;Jilada&nbsp;Eccleston<br>
+Last&nbsp;Edited:&nbsp;19/02/2015<br>
+&nbsp;<br>
+This&nbsp;program&nbsp;uses&nbsp;the&nbsp;CherryPy&nbsp;web&nbsp;server&nbsp;(from&nbsp;www.cherrypy.org).</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="hashlib.html">hashlib</a><br>
+<a href="json.html">json</a><br>
+</td><td width="25%" valign=top><a href="sqlite3.html">sqlite3</a><br>
+<a href="time.html">time</a><br>
+</td><td width="25%" valign=top><a href="urllib.html">urllib</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-addEvent"><strong>addEvent</strong></a>(eventDict, host)</dt><dd><tt>#&nbsp;Add&nbsp;an&nbsp;event&nbsp;to&nbsp;the&nbsp;database</tt></dd></dl>
+ <dl><dt><a name="-addRegisteredUsers"><strong>addRegisteredUsers</strong></a>(userList)</dt><dd><tt>#&nbsp;Function&nbsp;that&nbsp;will&nbsp;take&nbsp;a&nbsp;connected&nbsp;database&nbsp;and&nbsp;add&nbsp;the&nbsp;registered&nbsp;users&nbsp;to&nbsp;the&nbsp;list</tt></dd></dl>
+ <dl><dt><a name="-addUser"><strong>addUser</strong></a>(user)</dt><dd><tt>#&nbsp;Function&nbsp;will&nbsp;add&nbsp;single&nbsp;users&nbsp;one&nbsp;at&nbsp;a&nbsp;time&nbsp;to&nbsp;the&nbsp;database</tt></dd></dl>
+ <dl><dt><a name="-connectDatabase"><strong>connectDatabase</strong></a>()</dt><dd><tt>#&nbsp;Connect&nbsp;to&nbsp;the&nbsp;database,&nbsp;returns&nbsp;the&nbsp;connection&nbsp;object</tt></dd></dl>
+ <dl><dt><a name="-createTable"><strong>createTable</strong></a>()</dt><dd><tt>#&nbsp;Function&nbsp;that&nbsp;will&nbsp;take&nbsp;a&nbsp;connected&nbsp;database&nbsp;and&nbsp;add&nbsp;the&nbsp;table&nbsp;headers</tt></dd></dl>
+ <dl><dt><a name="-dropdownGet"><strong>dropdownGet</strong></a>()</dt><dd><tt>#&nbsp;Get&nbsp;a&nbsp;list&nbsp;of&nbsp;users&nbsp;who&nbsp;are&nbsp;online</tt></dd></dl>
+ <dl><dt><a name="-gatherEvents"><strong>gatherEvents</strong></a>(currentUser, toggle)</dt><dd><tt>#&nbsp;Gather&nbsp;all&nbsp;events&nbsp;for&nbsp;display&nbsp;on&nbsp;the&nbsp;screen</tt></dd></dl>
+ <dl><dt><a name="-getIP"><strong>getIP</strong></a>(destUPI)</dt><dd><tt>#&nbsp;Get&nbsp;the&nbsp;IP&nbsp;from&nbsp;the&nbsp;database</tt></dd></dl>
+ <dl><dt><a name="-getLogged"><strong>getLogged</strong></a>()</dt><dd><tt>#&nbsp;Get&nbsp;the&nbsp;logged&nbsp;users&nbsp;on&nbsp;this&nbsp;client</tt></dd></dl>
+ <dl><dt><a name="-getMessages"><strong>getMessages</strong></a>(user, clientUser)</dt><dd><tt>#&nbsp;Get&nbsp;all&nbsp;the&nbsp;messages&nbsp;sent&nbsp;to&nbsp;and&nbsp;from&nbsp;a&nbsp;person</tt></dd></dl>
+ <dl><dt><a name="-getProfile"><strong>getProfile</strong></a>(user)</dt><dd><tt>#&nbsp;Get&nbsp;the&nbsp;profile&nbsp;of&nbsp;a&nbsp;user</tt></dd></dl>
+ <dl><dt><a name="-getStatus"><strong>getStatus</strong></a>(user)</dt><dd><tt>#&nbsp;Get&nbsp;the&nbsp;status&nbsp;of&nbsp;the&nbsp;user</tt></dd></dl>
+ <dl><dt><a name="-getUsers"><strong>getUsers</strong></a>()</dt><dd><tt>#&nbsp;Get&nbsp;the&nbsp;users&nbsp;from&nbsp;the&nbsp;register</tt></dd></dl>
+ <dl><dt><a name="-insertMessage"><strong>insertMessage</strong></a>(messageData)</dt><dd><tt>#&nbsp;Refresh&nbsp;the&nbsp;message&nbsp;database&nbsp;so&nbsp;that&nbsp;messages&nbsp;are&nbsp;stored&nbsp;in&nbsp;teh&nbsp;database<br>
+#&nbsp;Need&nbsp;to&nbsp;add&nbsp;stuff&nbsp;to&nbsp;do&nbsp;with&nbsp;the&nbsp;hashing&nbsp;etc.</tt></dd></dl>
+ <dl><dt><a name="-pingRefresh"><strong>pingRefresh</strong></a>(sender)</dt><dd><tt>#&nbsp;Refreshes&nbsp;the&nbsp;database&nbsp;with&nbsp;the&nbsp;new&nbsp;user's&nbsp;current&nbsp;time</tt></dd></dl>
+ <dl><dt><a name="-refreshDatabase"><strong>refreshDatabase</strong></a>(onlineUsers)</dt><dd><tt>#&nbsp;Refresh&nbsp;Database&nbsp;will&nbsp;refresh&nbsp;and&nbsp;add&nbsp;the&nbsp;the&nbsp;activity&nbsp;of&nbsp;existing&nbsp;users&nbsp;in&nbsp;the&nbsp;list</tt></dd></dl>
+ <dl><dt><a name="-storeFile"><strong>storeFile</strong></a>(fileData)</dt><dd><tt>#&nbsp;Store&nbsp;the&nbsp;file&nbsp;messages&nbsp;on&nbsp;the&nbsp;database</tt></dd></dl>
+ <dl><dt><a name="-storeProfile"><strong>storeProfile</strong></a>(profileData, upi)</dt><dd><tt>#&nbsp;Store&nbsp;the&nbsp;profile&nbsp;values&nbsp;into&nbsp;the&nbsp;database</tt></dd></dl>
+ <dl><dt><a name="-storeStatus"><strong>storeStatus</strong></a>(status_in, user)</dt><dd><tt>#&nbsp;Store&nbsp;the&nbsp;current&nbsp;user&nbsp;status</tt></dd></dl>
+ <dl><dt><a name="-updateAttendance"><strong>updateAttendance</strong></a>(attendance, row_id)</dt><dd><tt>#&nbsp;Update&nbsp;the&nbsp;attendance&nbsp;of&nbsp;an&nbsp;event&nbsp;when&nbsp;a&nbsp;guest&nbsp;acknowledgegs</tt></dd></dl>
+ <dl><dt><a name="-updateEvent"><strong>updateEvent</strong></a>(acknow)</dt><dd><tt>#&nbsp;Update&nbsp;when&nbsp;the&nbsp;event&nbsp;has&nbsp;been&nbsp;acknowledge&nbsp;by&nbsp;the&nbsp;user</tt></dd></dl>
+ <dl><dt><a name="-updateLogged"><strong>updateLogged</strong></a>(user, pw)</dt><dd><tt>#&nbsp;Function&nbsp;that&nbsp;will&nbsp;update&nbsp;the&nbsp;people&nbsp;logged&nbsp;onto&nbsp;the&nbsp;client</tt></dd></dl>
+</td></tr></table>
+</body></html>

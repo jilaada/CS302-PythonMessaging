@@ -278,7 +278,12 @@ class MainApp(object):
 		
 		:return returns a string with formatted list of apis available to use
 		'''
-		output_dict = "/<receiveMessage>[sender][destination][message][stamp]\n/<getProfile>[profile_username]\n/<ping>[sender]\n/<receiveFile>[sender][destination][file]\nEncryption 0\nHashing 0"
+		output_dict = 	"/<getStatus>[profile_username]\n/<acknowledgeEvent>[sender][event_name][attendance][start_time]\n" \
+						"/<receiveMessage>[sender][destination][message][stamp]\n" \
+						"/<getProfile>[profile_username]\n/<ping>[sender]\n" \
+						"/<receiveFile>[sender][destination][file]\n" \
+						"/<receiveEvents>[sender][destination][event_name][event_description][event_location][start_time][end_time]\n" \
+						"Encryption 0\nHashing 0"
 		return output_dict
 
 
@@ -433,7 +438,6 @@ class MainApp(object):
 		else:
 			print "Sending to guest unsuccessful"
 		raise cherrypy.HTTPRedirect('/')
-
 
 
 	# =================
