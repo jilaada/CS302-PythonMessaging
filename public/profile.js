@@ -24,12 +24,32 @@ function viewProfiles() {
 	message_request = "/getAllUsers";
 	$.get(message_request, function(userNames) {
 		users = JSON.parse(userNames)
-		replaceText = '<ul class="side-nav"><li style="width:100% id="Home" float:center"><a class="active" href="/">Home</a></li>'
+		replaceText = '<ul class="side-nav"><input type="text" id="search-name" onkeyup="searchFunction()" placeholder="Search for names.."><ul class="side-nav" id="search-users">'
 		for (var items in users) {
-			replaceText += '<li style="width:100%"><a class="side" id="' + users[items]['upi'] + '" href="javascript:displayProfile(\'' + users[items]['upi'] + '\')">' + users[items]['upi'] + '</a></li>'
+			replaceText += '<li class="search-users" style="width:100%"><a class="side" id="' + users[items]['upi'] + '" href="javascript:displayProfile(\'' + users[items]['upi'] + '\')">' + users[items]['upi'] + '</a></li>'
 		}
+		replaceText += '</ul></ul>'
 		$(".dash").html(replaceText)
 	});
+}
+
+function searchFunction() {
+    // Declare variables
+    var input, filter, ul, li, a, i;
+    input = document.getElementById('search-name');
+    filter = input.value.toUpperCase();
+    ul = document.getElementById("search-users");
+    li = ul.getElementsByTagName('li');
+
+    // Loop through all list items, and hide those who don't match the search query
+    for (i = 0; i < li.length; i++) {
+        a = li[i].getElementsByTagName("a")[0];
+        if (a.innerHTML.toUpperCase().indexOf(filter) > -1) {
+            li[i].style.display = "";
+        } else {
+            li[i].style.display = "none";
+        }
+    }
 }
 
 
@@ -58,7 +78,15 @@ function getStatus() {
 
 
 function editEvent() {
-	replaceProfile = '<form action="/createEvent" method="post" enctype="multipart/form-data" class="editProfile">Event Name: <input type="text" name="name" value=""/><br/>Guest: <input type="text" name="guest" value=""/><br/>Start Time: <input type="text" name="start" value=""/><br/>End Time: <input type="text" name="end" value=""/><br/>Event Location: <input type="text" name="loc" value=""/><br/>Event Description:<br/> <textarea name="desc"></textarea><br/><button type="submit">Save Event</button></form>'
+	replaceProfile = 	'<div class="create-event">Create New Event</div>'
+	replaceProfile += 	'<form action="/createEvent" method="post" enctype="multipart/form-data" class="editProfile"> \
+						Event Name: <input type="text" name="name" value=""/><br/> \
+						Guest: <input type="text" name="guest" value=""/><br/> \
+						Start Time: (DD-MM-YYYY HH:MM:SS) <input type="text" name="start" value=""/><br/> \
+						End Time: (DD-MM-YYYY HH:MM:SS) <input type="text" name="end" value=""/><br/> \
+						Event Location: <input type="text" name="loc" value=""/><br/> \
+						Event Description:<br/> <textarea name="desc"></textarea><br/> \
+						<button type="submit">Save Event</button></form>'
 	$(".profile").html(replaceProfile)
 }
 

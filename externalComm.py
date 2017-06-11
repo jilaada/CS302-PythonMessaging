@@ -29,7 +29,6 @@ def externReport(curUser, curPw, curLocation):
 		# Need to try and report information to the login server as well as update the table list
 		# Need to confirm thaat the user is logged in
 		# If the username and the password as not none then they are logged in
-		# do something
 		try:
 			error = autoReport(curUser, curPw, curLocation)
 			usersOnline(curUser, curPw)
@@ -108,8 +107,14 @@ def usersOnline(user, pw):
 		portIP = databaseFunctions.getIP(userList[items]['username'])
 		try:
 			reqStatus(userList[items]['username'], portIP['ip'], portIP['port'])
-		except Error as e:
+		except TypeError as e:
+			try:
+				print userList[items]['username']
+			except TypeError as e:
+				print "Something wrong with database"
 			print "Error in getting statuses"
+		except Exception as e:
+			print str(e)
 
 
 # Send the message data to the users

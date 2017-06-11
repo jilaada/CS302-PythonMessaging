@@ -127,12 +127,32 @@ class MainApp(object):
 		else:
 			data = urllib.urlopen('http://cs302.pythonanywhere.com/logoff?username=' + username + '&password=' + password + '&enc=0')
 			externalComm.toggleAuthority(False)
+			dump = {"status":"Offline"}
+			dumps = json.dumps(dump)
+			databaseFunctions.storeStatus(dumps, cherrypy.session['username'])
 			print data.read()
 			cherrypy.lib.sessions.expire()
 			cherrypy.session['username'] = None
 			cherrypy.session['password'] = None
 			cherrypy.session['location'] = None
 		raise cherrypy.HTTPRedirect('/')
+
+
+	def __init__(self):
+		cherrypy.engine.subscribe('stop',self.shutdownActions)
+
+	# This function will allow the application signout all users in the database that are logged in
+	def shutdownActions(self):
+		print "----------------------------------"
+		print "ENGINE SHUTTING OFF - AUTO LOG-OFF"
+		print "----------------------------------"
+		data = databaseFunctions.getLogged()
+		for item in data:
+			data = urllib.urlopen('http://cs302.pythonanywhere.com/logoff?username=' + item[0] + '&password=' + item[1] + '&enc=0')
+			print data
+		print "----------------------------------"
+		print "SHUT DOWN COMPLETE"
+		print "----------------------------------"
 
 
 	@cherrypy.expose
@@ -307,16 +327,10 @@ class MainApp(object):
 
 
 	@cherrypy.expose()
-	def ping(self, sender):
+	def ping(self, sender=None):
 		databaseFunctions.pingRefresh(sender)
 		return "0"
 
-
-	@cherrypy.expose()
-	@cherrypy.tools.json_in()
-	def handshake(self):
-		inputMessage = cherrypy.request.json
-		pass
 
 	@cherrypy.expose()
 	@cherrypy.tools.json_in()
@@ -465,6 +479,7 @@ class MainApp(object):
 			cherrypy.session['password'] = hashpw
 			cherrypy.session['username'] = username
 			cherrypy.session['location'] = location
+			databaseFunctions.updateLogged(username, hashpw)
 			t = threading.Thread(target=externalComm.externReport, args=(cherrypy.session['username'], cherrypy.session['password'], cherrypy.session['location']))
 			t.daemon = True
 			externalComm.toggleAuthority(True)

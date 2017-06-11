@@ -50,11 +50,24 @@ $('input[type=file]').change(function(){
 	});
 
 
-$(".message-box-user").click(function(){
-    $("span").fadeIn();
-});
+function searchFunction() {
+    // Declare variables
+    var input, filter, ul, li, a, i;
+    input = document.getElementById('search-name');
+    filter = input.value.toUpperCase();
+    ul = document.getElementById("search-users");
+    li = ul.getElementsByTagName('li');
 
-
+    // Loop through all list items, and hide those who don't match the search query
+    for (i = 0; i < li.length; i++) {
+        a = li[i].getElementsByTagName("a")[0];
+        if (a.innerHTML.toUpperCase().indexOf(filter) > -1) {
+            li[i].style.display = "";
+        } else {
+            li[i].style.display = "none";
+        }
+    }
+}
 
 function refreshUsers() {
 	var message_request;
@@ -98,6 +111,15 @@ function refreshMessages(user) {
 		$('.messages').html(response);
 	});
 }
+
+
+document.getElementById("clear").addEventListener("keydown", function(e) {
+	if (e.keyCode == 13) { 
+		sendMessage();
+		refreshMessages(activeUser)
+		document.getElementById('clear').value='';
+	}
+}, false);
 
 
 $(document).ready(function() {

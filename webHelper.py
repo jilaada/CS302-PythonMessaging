@@ -56,7 +56,6 @@ def createViewMessage(messages, currentUser):
 	# Need to get the messages and create the divs
 	try:
 		for items in messages:
-			print items['message_type']
 			try:
 				messagetype = str(items['message_type'])
 				messagetype = messagetype.split("/")
@@ -86,13 +85,13 @@ def createViewMessage(messages, currentUser):
 					elif messagetype[0] == "video":
 						div += '<span style="text-align:left;">' + send_time + '</span><div class="message-box-dest" name="' + send_time + '">' + items['senderUPI'] + ': <video controls><source src="public/downloads/' + items['message'] + '"></source></video></div>'
 					elif messagetype[0] == "image":
-						div += '<span style="text-align:right;">' + send_time + '</span><div class="message-box-dest" name="' + send_time + '">' + items['senderUPI'] + ': <img class="images" src="public/downloads/' + items['message'] + '"></img></div>'
+						div += '<span style="text-align:left;">' + send_time + '</span><div class="message-box-dest" name="' + send_time + '">' + items['senderUPI'] + ': <img class="images" src="public/downloads/' + items['message'] + '"></img></div>'
 					elif messagetype[0] == "application" or messagetype[0] == "text":
-						div += '<span style="text-align:right;">' + send_time + '</span><div class="message-box-dest" name="' + send_time + '">' + items['senderUPI'] + ': <a download href="public/downloads/' + items['message'] + '" >' + items['message'] + '</a></div>'
+						div += '<span style="text-align:left;">' + send_time + '</span><div class="message-box-dest" name="' + send_time + '">' + items['senderUPI'] + ': <a download href="public/downloads/' + items['message'] + '" >' + items['message'] + '</a></div>'
 					elif messagetype[0] == "audio":
-						div += '<span style="text-align:right;">' + send_time + '</span><div class="message-box-dest" name="' + send_time + '">' + items['senderUPI'] + ': <audio href="public/downloads/' + items['message'] + '" >' + items['message'] + '</audio></div>'
+						div += '<span style="text-align:left;">' + send_time + '</span><div class="message-box-dest" name="' + send_time + '">' + items['senderUPI'] + ': <audio href="public/downloads/' + items['message'] + '" >' + items['message'] + '</audio></div>'
 					else:
-						div += '<span style="text-align:right;">' + send_time + '</span><div class="message-box-dest" name="' + send_time + '">' + items['senderUPI'] + ': ' + items['message'] + '</div>'
+						div += '<span style="text-align:left;">' + send_time + '</span><div class="message-box-dest" name="' + send_time + '">' + items['senderUPI'] + ': ' + items['message'] + '</div>'
 			except Error as e:
 				print e
 		return div
@@ -108,12 +107,13 @@ def createUserList(user, pw):
 	except Error as e:
 		print e
 	
-	replaceText = '<ul class="side-nav">' \
-	              '<li style="width:100% id="Home" float:center"><a class="active" href="/">Home</a></li>'
-
+	replaceText = 	'<ul class="side-nav">' \
+					'<input type="text" id="search-name" onkeyup="searchFunction()" placeholder="Search for names..">' \
+					'<ul class="side-nav" id="search-users">'
 	try:
 		for items in dic:
-			replaceText += '<li style="width:100%"><a class="side" id="' + dic[items]['username'] + '" href="javascript:displayMessages(\'' + dic[items]['username'] + '\')">' + dic[items]['username'] + '</a></li>'
+			replaceText += '<li class="search-users" style="width:100%"><a class="side" id="' + dic[items]['username'] + '" href="javascript:displayMessages(\'' + dic[items]['username'] + '\')">' + dic[items]['username'] + '</a></li>'
+		replaceText += '</ul></ul>'
 	except Error as e:
 		print e
 	return replaceText

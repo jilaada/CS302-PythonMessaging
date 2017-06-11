@@ -24,7 +24,7 @@ from sqlite3 import Error
 
 # Function that will take a connected database and add the table headers
 def createTable():
-	sql_create_table_usersRegisters = "CREATE TABLE IF NOT EXISTS userRegister (id INTEGER PRIMARY KEY AUTOINCREMENT, upi TEXT UNIQUE, ip TEXT, public_key TEXT, location INTEGER, last_login TEXT, port TEXT, status TEXT); "
+	sql_create_table_usersRegisters = "CREATE TABLE IF NOT EXISTS userRegister (id INTEGER PRIMARY KEY AUTOINCREMENT, upi TEXT UNIQUE, ip TEXT, public_key TEXT, location INTEGER, last_login TEXT, port TEXT, status TEXT, logged INTEGER NOT NULL DEFAULT 0, pwd TEXT DEFAULT 0); "
 	sql_create_table_messageData = "CREATE TABLE IF NOT EXISTS messageData (id INTEGER PRIMARY KEY AUTOINCREMENT, senderUPI TEXT, destinationUPI TEXT, time_stamp TEXT, message TEXT, message_type TEXT); "
 	sql_create_table_profile = "CREATE TABLE IF NOT EXISTS userProfile (id INTEGER PRIMARY KEY AUTOINCREMENT, upi TEXT UNIQUE, fullname TEXT, position TEXT, description TEXT, location TEXT, picture TEXT); "
 	sql_create_table_events = "CREATE TABLE IF NOT EXISTS eventData (id INTEGER PRIMARY KEY AUTOINCREMENT, event_id TEXT , host TEXT, guest TEXT, event_name TEXT, start_time TEXT, end_time TEXT, attendance INTEGER, event_desc TEXT, event_loc TEXT); "
@@ -60,6 +60,40 @@ def addUser(user):
 		print "Error in Database Execution - " + str(e)
 	conn.close()
 	pass
+
+def updateLogged(user, pw):
+	conn = connectDatabase()
+	c = conn.cursor()
+	print "here"
+	try:
+		sql_update_logged = 'UPDATE userRegister SET logged==:log, pwd==:pw WHERE upi==:username'
+		c.execute(sql_update_logged, {"log":1, "pw":pw, "username":user})
+		conn.commit()
+		conn.close()
+	except Exception as e:
+		print str(e)
+		conn.close()
+
+
+def getLogged():
+	conn = connectDatabase()
+	conn.row_factory = sqlite3.Row
+	c = conn.cursor()
+	try:
+		sql_select_logged = 'SELECT upi, pwd FROM userRegister WHERE logged==:log'
+		c.execute(sql_select_logged, {"log":1})
+		data = c.fetchall()
+		try:
+			sql_update_logged = 'UPDATE userRegister SET logged==:log, pwd==:pw WHERE upi==:user'
+			c.execute(sql_update_logged, {"log":0, "pw":"0", "user":data[0]['upi']})
+			conn.commit()
+		except Exception as e:
+			print str(e)
+		conn.close()
+		return data
+	except Exception as e:
+		print str(e)
+		return None
 
 
 def getUsers():
@@ -375,7 +409,7 @@ def updateAttendance(attendance, row_id):
 	conn = connectDatabase()
 	c = conn.cursor()
 	try:
-		sql_update_event = 'UPDATE eventData SET attendance = :attend WHERE id==:rowid '
+		sql_update_event = 'UPDATE eventData SET attendance = :attend WHERE id==:rowid'
 		c.execute(sql_update_event, {"attend":attendance, "rowid":row_id})
 		conn.commit()
 		print "here"
