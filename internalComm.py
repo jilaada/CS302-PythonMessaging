@@ -23,7 +23,10 @@ def profile(user, sender):
 	sendData = json.dumps(user_dict)
 	data = databaseFunctions.getIP(user)
 	try:
-		sent = externalComm.reqProfile(sendData, data["ip"], data["port"])
+		if data['ip'] is not None:
+			sent = externalComm.reqProfile(sendData, data["ip"], data["port"])
+		else:
+			return None
 		if sent != 0:
 			try:
 				# Store values in the database

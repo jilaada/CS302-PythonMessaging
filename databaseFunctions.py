@@ -118,19 +118,19 @@ def refreshDatabase(onlineUsers):
 	c = conn.cursor()
 	for items in dic:
 		try:
-			sql_update_pubkey = 'UPDATE userRegister SET public_key==:publickey WHERE upi==:username'
-			c.execute(sql_update_pubkey, {"publickey": dic[items]['publicKey'], "username": dic[items]['username']})
+			sql_update_user = 'UPDATE userRegister SET ip==:ip, location==:location, last_login==:lastLogin, port==:port WHERE upi==:username'
+			c.execute(sql_update_user, {"ip": dic[items]['ip'], "location": dic[items]['location'],
+			                            "lastLogin": dic[items]['lastLogin'], "username": dic[items]['username'],
+			                            "port": dic[items]['port']})
 			conn.commit()
 		except KeyError:
 			try:
-				sql_update_user = 'UPDATE userRegister SET ip==:ip, location==:location, last_login==:lastLogin, port==:port WHERE upi==:username'
-				c.execute(sql_update_user, {"ip": dic[items]['ip'], "location": dic[items]['location'],
-				                            "lastLogin": dic[items]['lastLogin'], "username": dic[items]['username'],
-				                            "port": dic[items]['port']})
+				sql_update_pubkey = 'UPDATE userRegister SET public_key==:publickey WHERE upi==:username'
+				c.execute(sql_update_pubkey, {"publickey": dic[items]['publicKey'], "username": dic[items]['username']})
 				conn.commit()
+				conn.close()
 			except (KeyError, TypeError) as e:
-				print e
-	conn.close()
+				conn.close()
 	return dic
 
 def pingRefresh(sender):

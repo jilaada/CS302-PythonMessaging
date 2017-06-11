@@ -86,27 +86,29 @@ class MainApp(object):
 	# The main web page for the website. The user is directed here when they first open the browser
 	@cherrypy.expose
 	def index(self):
+		# Try connect to the database if it doesn't exist
+		# Create tables if they don't exist
+		# Get all the users and add to register
+		try:
+			conn = sqlite3.connect("database.db")
+		except Exception as e:
+			print(e)
+		finally:
+			conn.close()
+			cherrypy.session['database'] = "on"
+
+		print "About to create tables"
+		databaseFunctions.createTable()
+		print "tables created"
+		users = externalComm.getAllUsers()
+		databaseFunctions.addRegisteredUsers(users)
+
 		# Try to create a log in page using valid cherrypy sessions
 		# Raise a key error or a type error and redirect to the login page if the session doesn't exist
 		try:
 			Page = webHelper.createHomePage(cherrypy.session['username'])
 		except (KeyError, TypeError):
 			raise cherrypy.HTTPRedirect('/login')
-		
-		# Try connect to the database if it doesn't exist 
-		# Create tables if they don't exist
-		# Get all the users and add to register
-		try:
-			conn = sqlite3.connect("database.db")
-			databaseFunctions.createTable()
-			users = externalComm.getAllUsers()
-			databaseFunctions.addRegisteredUsers(users)
-		except Exception as e:
-			print(e)
-		finally:
-			conn.close()
-			cherrypy.session['database'] = "on"
-		
 		return Page
 
 
@@ -277,8 +279,8 @@ class MainApp(object):
 			internalComm.profile(user, cherrypy.session['username'])
 			try:
 				data = databaseFunctions.getProfile(user)
-				if data == None:
-					output_dict = {"fullname":user, "position":"Not Sepcified", "description":"Not Specified", "location":"Not Specified", "picture":"https://sorted.org.nz/themes/sorted/assets/images/user-icon-grey.svg"}
+				if data is None:
+					output_dict = {"fullname":user, "position":"Not Specified", "description":"Not Specified", "location":"Not Specified", "picture":"https://sorted.org.nz/themes/sorted/assets/images/user-icon-grey.svg"}
 				else:
 					profile = [sub for sub in data]
 					output_dict = {"fullname": profile[2], "position": profile[3], "description": profile[4], "location": profile[5], "picture": profile[6]}
@@ -286,7 +288,8 @@ class MainApp(object):
 				return json.dumps(output_dict)
 			except Error as e:
 				print e
-		except (KeyError, TypeError):
+		except (KeyError, TypeError) as e:
+			print str(e)
 			print "Getting profile failed"
 
 
@@ -377,8 +380,13 @@ class MainApp(object):
 	def getUserProfile(self):
 		try: 
 			data = databaseFunctions.getProfile(cherrypy.session['username'])
-			profile = [sub for sub in data]
-			output_dict = {"fullname": profile[2], "position": profile[3], "description": profile[4], "location": profile[5], "picture": profile[6]}
+			if data is not None:
+				profile = [sub for sub in data]
+				output_dict = {"fullname": profile[2], "position": profile[3], "description": profile[4], "location": profile[5], "picture": profile[6]}
+			else:
+				output_dict = {"fullname": cherrypy.session['username'], "position": "Not Specified", "description": "Not Specified",
+				               "location": "Not Specified",
+				               "picture": "https://sorted.org.nz/themes/sorted/assets/images/user-icon-grey.svg"}
 			return json.dumps(output_dict)
 		except Error as e:
 			print e
